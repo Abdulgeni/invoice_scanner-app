@@ -1,0 +1,67 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Invoice Scanner",
+  "homeLastInvoiceTotal": "Last invoice total",
+
+  "scanAction": "Scan",
+  "scanInvoiceSemantics": "Scan invoice",
+  "importFromGallery": "Import from gallery",
+  "retakeAction": "Retake",
+  "retryAction": "Try again",
+  "keepImageAction": "Keep image",
+  "cancelAction": "Cancel",
+  "confirmAndSaveAction": "Confirm & Save",
+
+  "stageOptimizing": "Optimizing image",
+  "stageReading": "Reading invoice",
+  "stageValidating": "Checking totals",
+
+  "errorTitle": "Couldn't read this invoice",
+  "errorNetwork": "You appear to be offline. Connect to the internet and try again.",
+  "@errorNetwork": {
+    "description": "Module 6 will replace this with an offline-queue promise once that queue ships."
+  },
+  "errorTimeout": "This is taking longer than expected. Check your connection and try again.",
+  "errorQuotaExceeded": "You've reached the scanning limit for now. Please try again in a little while.",
+  "@errorQuotaExceeded": {
+    "description": "Single user-facing message for rate or usage limits. Must not mention any backend, provider, or error code."
+  },
+  "errorAppCheckFailed": "We couldn't verify this copy of the app. Update it from the official app store and try again.",
+  "errorSafetyBlock": "This image couldn't be processed. Try a clearer photo of the invoice.",
+  "errorEmptyResponse": "We couldn't read anything from this image. Try again, or retake the photo in better light.",
+  "errorMalformedJson": "We couldn't make sense of the result. Please try again.",
+  "errorNotAnInvoice": "This doesn't look like an invoice. Retake the photo with the whole page in view.",
+  "errorCancelled": "Scan cancelled.",
+  "errorUnknown": "Something went wrong. Please try again.",
+
+  "pageLimitExceeded": "Invoices can have up to {max} pages. Remove some pages and try again.",
+  "@pageLimitExceeded": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+
+  "warningTotalMismatch": "The line items add up to {lineSum}, but the total says {total}.",
+  "@warningTotalMismatch": {
+    "placeholders": {
+      "lineSum": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+
+  "validationInvalidNumber": "Enter a valid number, for example {example}.",
+  "@validationInvalidNumber": {
+    "placeholders": {
+      "example": {
+        "type": "String"
+      }
+    }
+  }
+}
