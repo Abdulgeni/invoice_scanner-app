@@ -42,10 +42,10 @@ class LocalizedNumberParser {
     String zeroDigit = '0',
     String minus = '-',
     this.allowIndianGrouping = false,
-  })  : _decimal = decimal,
-        _group = group,
-        _zeroRune = zeroDigit.runes.first,
-        _localeMinus = minus.replaceAll(_bidiMarks, '');
+  }) : _decimal = decimal,
+       _group = group,
+       _zeroRune = zeroDigit.runes.first,
+       _localeMinus = minus.replaceAll(_bidiMarks, '');
 
   // [M2-ADJUST-3] Also accept hi/bn for Indian grouping.
   static const Set<String> _indianGroupingLocales = <String>{'hi', 'bn'};
@@ -53,14 +53,14 @@ class LocalizedNumberParser {
   factory LocalizedNumberParser.forLocale(String localeName) {
     final String canonical = Intl.canonicalizedLocale(localeName);
     final String short = Intl.shortLocale(canonical);
-    final symbols = numberFormatSymbols[canonical] ??
-        numberFormatSymbols[short];
+    final symbols =
+        numberFormatSymbols[canonical] ?? numberFormatSymbols[short];
     if (symbols == null) {
       return LocalizedNumberParser.withSeparators(decimal: '.', group: ',');
     }
     // [M2-ADJUST-3]
-    final bool indian = canonical.endsWith('_IN') ||
-        _indianGroupingLocales.contains(short);
+    final bool indian =
+        canonical.endsWith('_IN') || _indianGroupingLocales.contains(short);
     return LocalizedNumberParser.withSeparators(
       decimal: symbols.DECIMAL_SEP,
       group: symbols.GROUP_SEP,
@@ -87,14 +87,18 @@ class LocalizedNumberParser {
   static const int _markerRune = 0x1F;
 
   static const Set<int> _universalGroupRunes = <int>{
-    0x20, 0xA0, 0x2007, 0x2009, 0x202F, 0x27, 0x2019,
+    0x20,
+    0xA0,
+    0x2007,
+    0x2009,
+    0x202F,
+    0x27,
+    0x2019,
   };
 
   // [M2-ADJUST-2] Strip an optional ISO-4217 code or common currency symbol
   // and a single trailing space. Does not touch the parser itself.
-  static final RegExp _currencyPrefix = RegExp(
-    r'^\s*(?:[A-Z]{3}|\$|€|£|¥)\s*',
-  );
+  static final RegExp _currencyPrefix = RegExp(r'^\s*(?:[A-Z]{3}|\$|€|£|¥)\s*');
 
   static String stripCurrencyPrefix(String input) =>
       input.replaceFirst(_currencyPrefix, '');
@@ -125,8 +129,9 @@ class LocalizedNumberParser {
       return _fail(DecimalParseFailure.multipleDecimalSeparators);
     }
     final String intPart = decAt < 0 ? s : s.substring(0, decAt);
-    final String fracPart =
-        decAt < 0 ? '' : s.substring(decAt + _decimal.length);
+    final String fracPart = decAt < 0
+        ? ''
+        : s.substring(decAt + _decimal.length);
     if (!_isAsciiDigits(fracPart)) {
       return _fail(DecimalParseFailure.invalidCharacter);
     }
@@ -188,8 +193,7 @@ class LocalizedNumberParser {
         middle.every((String x) => x.length == 2);
   }
 
-  bool _isMinus(String ch) =>
-      ch == '-' || ch == '\u2212' || ch == _localeMinus;
+  bool _isMinus(String ch) => ch == '-' || ch == '\u2212' || ch == _localeMinus;
 
   int? _digitValue(int r) {
     if (r >= 0x30 && r <= 0x39) return r - 0x30;

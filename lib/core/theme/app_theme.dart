@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 
 import 'package:invoice_scanner/core/theme/app_colors.dart';
@@ -5,10 +7,14 @@ import 'package:invoice_scanner/core/theme/app_tokens.dart';
 import 'package:invoice_scanner/core/theme/app_typography.dart';
 
 abstract final class AppTheme {
-  static final ThemeData light =
-      _build(AppColors.lightScheme, AppSemanticColors.light);
-  static final ThemeData dark =
-      _build(AppColors.darkScheme, AppSemanticColors.dark);
+  static final ThemeData light = _build(
+    AppColors.lightScheme,
+    AppSemanticColors.light,
+  );
+  static final ThemeData dark = _build(
+    AppColors.darkScheme,
+    AppSemanticColors.dark,
+  );
 
   static ThemeData _build(ColorScheme scheme, AppSemanticColors semantic) {
     final TextTheme text = AppTypography.textTheme(scheme.brightness, scheme);
@@ -20,8 +26,9 @@ abstract final class AppTheme {
       AppSizes.buttonMinWidth,
       AppSizes.minTouchTarget,
     );
-    final RoundedRectangleBorder buttonShape =
-        RoundedRectangleBorder(borderRadius: AppRadii.mdAll);
+    final RoundedRectangleBorder buttonShape = RoundedRectangleBorder(
+      borderRadius: AppRadii.mdAll,
+    );
 
     return ThemeData(
       useMaterial3: true,
@@ -103,10 +110,11 @@ abstract final class AppTheme {
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         backgroundColor: scheme.inverseSurface,
-        contentTextStyle:
-            text.bodyMedium?.copyWith(color: scheme.onInverseSurface),
+        contentTextStyle: text.bodyMedium?.copyWith(
+          color: scheme.onInverseSurface,
+        ),
         actionTextColor: scheme.inversePrimary,
-        shape: RoundedRectangleBorder(borderRadius: AppRadii.mdAll),
+        shape: const RoundedRectangleBorder(borderRadius: AppRadii.mdAll),
       ),
     );
   }

@@ -5,8 +5,9 @@ import 'package:invoice_scanner/l10n/app_localizations.dart';
 
 void main() {
   test('every error kind has a human message', () async {
-    final AppLocalizations l =
-        await AppLocalizations.delegate.load(const Locale('en'));
+    final AppLocalizations l = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
     final Map<String, String> messages = <String, String>{
       'network': l.errorNetwork,
       'timeout': l.errorTimeout,
@@ -25,8 +26,9 @@ void main() {
   });
 
   test('user-facing error messages leak no backend internals', () async {
-    final AppLocalizations l =
-        await AppLocalizations.delegate.load(const Locale('en'));
+    final AppLocalizations l = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
     const List<String> forbidden = <String>[
       'firebase',
       'gemini',
@@ -57,8 +59,9 @@ void main() {
   });
 
   test('placeholders render', () async {
-    final AppLocalizations l =
-        await AppLocalizations.delegate.load(const Locale('en'));
+    final AppLocalizations l = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
     expect(l.pageLimitExceeded(5), contains('5'));
     expect(
       l.warningTotalMismatch('10.00', '12.00'),

@@ -2,14 +2,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:invoice_scanner/core/l10n/localized_number_parser.dart';
 
 String? ok(DecimalParseResult r) => switch (r) {
-      DecimalParsed(:final canonical) => canonical,
-      DecimalParseFailed() => null,
-    };
+  DecimalParsed(:final canonical) => canonical,
+  DecimalParseFailed() => null,
+};
 
 DecimalParseFailure? bad(DecimalParseResult r) => switch (r) {
-      DecimalParsed() => null,
-      DecimalParseFailed(:final reason) => reason,
-    };
+  DecimalParsed() => null,
+  DecimalParseFailed(:final reason) => reason,
+};
 
 void main() {
   final LocalizedNumberParser en = LocalizedNumberParser.forLocale('en');
@@ -52,21 +52,21 @@ void main() {
   group('en rejects', () {
     const Map<String, DecimalParseFailure> cases =
         <String, DecimalParseFailure>{
-      '': DecimalParseFailure.empty,
-      '-': DecimalParseFailure.noDigits,
-      '.': DecimalParseFailure.noDigits,
-      'abc': DecimalParseFailure.invalidCharacter,
-      '\$5': DecimalParseFailure.invalidCharacter,
-      '-(5)': DecimalParseFailure.invalidCharacter,
-      '1.2.3': DecimalParseFailure.multipleDecimalSeparators,
-      '1,23': DecimalParseFailure.invalidGrouping,
-      '1,2345': DecimalParseFailure.invalidGrouping,
-      ',234': DecimalParseFailure.invalidGrouping,
-      '1,,234': DecimalParseFailure.invalidGrouping,
-      '12,34,567.89': DecimalParseFailure.invalidGrouping,
-      '1234567890123456': DecimalParseFailure.tooLarge,
-      '0.1234567': DecimalParseFailure.tooManyDecimals,
-    };
+          '': DecimalParseFailure.empty,
+          '-': DecimalParseFailure.noDigits,
+          '.': DecimalParseFailure.noDigits,
+          'abc': DecimalParseFailure.invalidCharacter,
+          '\$5': DecimalParseFailure.invalidCharacter,
+          '-(5)': DecimalParseFailure.invalidCharacter,
+          '1.2.3': DecimalParseFailure.multipleDecimalSeparators,
+          '1,23': DecimalParseFailure.invalidGrouping,
+          '1,2345': DecimalParseFailure.invalidGrouping,
+          ',234': DecimalParseFailure.invalidGrouping,
+          '1,,234': DecimalParseFailure.invalidGrouping,
+          '12,34,567.89': DecimalParseFailure.invalidGrouping,
+          '1234567890123456': DecimalParseFailure.tooLarge,
+          '0.1234567': DecimalParseFailure.tooManyDecimals,
+        };
     cases.forEach((String input, DecimalParseFailure reason) {
       test('"$input" -> ${reason.name}', () {
         expect(bad(en.parse(input)), reason);
@@ -102,14 +102,17 @@ void main() {
       expect(ok(hi.parse('12,34,567')), '1234567');
     });
     test('locale zero digit is honored', () {
-      final LocalizedNumberParser devanagari = LocalizedNumberParser.withSeparators(
-        decimal: '.',
-        group: ',',
-        zeroDigit: '\u0966',
-      );
+      final LocalizedNumberParser devanagari =
+          LocalizedNumberParser.withSeparators(
+            decimal: '.',
+            group: ',',
+            zeroDigit: '\u0966',
+          );
       expect(ok(devanagari.parse('\u0967\u0968\u0969')), '123');
-      expect(bad(en.parse('\u0967\u0968\u0969')),
-          DecimalParseFailure.invalidCharacter);
+      expect(
+        bad(en.parse('\u0967\u0968\u0969')),
+        DecimalParseFailure.invalidCharacter,
+      );
     });
   });
 
@@ -117,7 +120,10 @@ void main() {
   group('stripCurrencyPrefix', () {
     test('removes ISO codes and common symbols', () {
       expect(LocalizedNumberParser.stripCurrencyPrefix('EUR 12.50'), '12.50');
-      expect(LocalizedNumberParser.stripCurrencyPrefix('\$1,234.56'), '1,234.56');
+      expect(
+        LocalizedNumberParser.stripCurrencyPrefix('\$1,234.56'),
+        '1,234.56',
+      );
       expect(LocalizedNumberParser.stripCurrencyPrefix('€ 99,00'), '99,00');
       expect(LocalizedNumberParser.stripCurrencyPrefix('  £5'), '5');
       expect(LocalizedNumberParser.stripCurrencyPrefix('12.50'), '12.50');

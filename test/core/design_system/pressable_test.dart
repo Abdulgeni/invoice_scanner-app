@@ -1,6 +1,10 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:invoice_scanner/core/design_system/pressable.dart';
+import 'package:invoice_scanner/core/theme/app_colors.dart';
 import 'package:invoice_scanner/core/theme/app_theme.dart';
 import 'package:invoice_scanner/core/theme/app_tokens.dart';
 import 'package:invoice_scanner/core/theme/app_typography.dart';
@@ -50,24 +54,26 @@ void main() {
   });
 
   // [M1-ADJUST-2] Replaces the weak counter test with a semantics assertion.
-  testWidgets('disabled when onPressed is null (semantics has no enabled flag)',
-      (tester) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-    await tester.pumpWidget(
-      _host(
-        const Pressable(
-          semanticLabel: 'Disabled',
-          onPressed: null,
-          child: Text('x'),
+  testWidgets(
+    'disabled when onPressed is null (semantics has no enabled flag)',
+    (tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _host(
+          const Pressable(
+            semanticLabel: 'Disabled',
+            onPressed: null,
+            child: Text('x'),
+          ),
         ),
-      ),
-    );
-    final SemanticsNode node = tester.getSemantics(find.byType(Pressable));
-    expect(node.hasFlag(SemanticsFlag.isEnabled), isFalse);
-    expect(node.hasFlag(SemanticsFlag.isButton), isTrue);
-    await tester.tap(find.byType(Pressable));
-    handle.dispose();
-  });
+      );
+      final SemanticsNode node = tester.getSemantics(find.byType(Pressable));
+      expect(node.flagsCollection.isEnabled, Tristate.isFalse);
+      expect(node.flagsCollection.isButton, isTrue);
+      await tester.tap(find.byType(Pressable));
+      handle.dispose();
+    },
+  );
 
   testWidgets('reduce-motion resolves durations to zero', (tester) async {
     late Duration resolved;

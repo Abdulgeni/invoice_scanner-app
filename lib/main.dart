@@ -78,8 +78,9 @@ class _ThemePreview extends StatelessWidget {
               padding: const EdgeInsetsDirectional.all(AppSpacing.md),
               child: Text(
                 l10n.warningTotalMismatch('1,284.00', '1,284.50'),
-                style: text.bodyMedium
-                    ?.copyWith(color: semantic.onWarningContainer),
+                style: text.bodyMedium?.copyWith(
+                  color: semantic.onWarningContainer,
+                ),
               ),
             ),
           ),

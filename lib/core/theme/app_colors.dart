@@ -131,10 +131,10 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color onHero;
 
   LinearGradient get heroGradient => LinearGradient(
-        begin: AlignmentDirectional.topStart,
-        end: AlignmentDirectional.bottomEnd,
-        colors: <Color>[heroStart, heroEnd],
-      );
+    begin: AlignmentDirectional.topStart,
+    end: AlignmentDirectional.bottomEnd,
+    colors: <Color>[heroStart, heroEnd],
+  );
 
   static AppSemanticColors of(BuildContext context) =>
       Theme.of(context).extension<AppSemanticColors>()!;

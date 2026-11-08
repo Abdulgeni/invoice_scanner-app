@@ -13,42 +13,38 @@ double contrast(Color a, Color b) {
 typedef _Pair = (String, Color, Color);
 
 List<_Pair> _schemePairs(ColorScheme s) => <_Pair>[
-      ('onSurface/surface', s.onSurface, s.surface),
-      ('onSurface/card', s.onSurface, s.surfaceContainerLowest),
-      ('onSurfaceVariant/surface', s.onSurfaceVariant, s.surface),
-      (
-        'onSurfaceVariant/highest',
-        s.onSurfaceVariant,
-        s.surfaceContainerHighest
-      ),
-      ('onPrimary/primary', s.onPrimary, s.primary),
-      ('onPrimaryContainer', s.onPrimaryContainer, s.primaryContainer),
-      ('onSecondary/secondary', s.onSecondary, s.secondary),
-      ('onSecondaryContainer', s.onSecondaryContainer, s.secondaryContainer),
-      ('onTertiary/tertiary', s.onTertiary, s.tertiary),
-      ('onTertiaryContainer', s.onTertiaryContainer, s.tertiaryContainer),
-      ('onError/error', s.onError, s.error),
-      ('onErrorContainer', s.onErrorContainer, s.errorContainer),
-      ('onInverseSurface', s.onInverseSurface, s.inverseSurface),
-      ('inversePrimary/inverseSurface', s.inversePrimary, s.inverseSurface),
-      ('primary text on surface', s.primary, s.surface),
-    ];
+  ('onSurface/surface', s.onSurface, s.surface),
+  ('onSurface/card', s.onSurface, s.surfaceContainerLowest),
+  ('onSurfaceVariant/surface', s.onSurfaceVariant, s.surface),
+  ('onSurfaceVariant/highest', s.onSurfaceVariant, s.surfaceContainerHighest),
+  ('onPrimary/primary', s.onPrimary, s.primary),
+  ('onPrimaryContainer', s.onPrimaryContainer, s.primaryContainer),
+  ('onSecondary/secondary', s.onSecondary, s.secondary),
+  ('onSecondaryContainer', s.onSecondaryContainer, s.secondaryContainer),
+  ('onTertiary/tertiary', s.onTertiary, s.tertiary),
+  ('onTertiaryContainer', s.onTertiaryContainer, s.tertiaryContainer),
+  ('onError/error', s.onError, s.error),
+  ('onErrorContainer', s.onErrorContainer, s.errorContainer),
+  ('onInverseSurface', s.onInverseSurface, s.inverseSurface),
+  ('inversePrimary/inverseSurface', s.inversePrimary, s.inverseSurface),
+  ('primary text on surface', s.primary, s.surface),
+];
 
 List<_Pair> _semanticPairs(AppSemanticColors c) => <_Pair>[
-      ('onSuccess/success', c.onSuccess, c.success),
-      ('onSuccessContainer', c.onSuccessContainer, c.successContainer),
-      ('onWarning/warning', c.onWarning, c.warning),
-      ('onWarningContainer', c.onWarningContainer, c.warningContainer),
-      ('onHero/heroStart', c.onHero, c.heroStart),
-      ('onHero/heroEnd', c.onHero, c.heroEnd),
-    ];
+  ('onSuccess/success', c.onSuccess, c.success),
+  ('onSuccessContainer', c.onSuccessContainer, c.successContainer),
+  ('onWarning/warning', c.onWarning, c.warning),
+  ('onWarningContainer', c.onWarningContainer, c.warningContainer),
+  ('onHero/heroStart', c.onHero, c.heroStart),
+  ('onHero/heroEnd', c.onHero, c.heroEnd),
+];
 
 void main() {
   const Map<String, (ColorScheme, AppSemanticColors)> themes =
       <String, (ColorScheme, AppSemanticColors)>{
-    'light': (AppColors.lightScheme, AppSemanticColors.light),
-    'dark': (AppColors.darkScheme, AppSemanticColors.dark),
-  };
+        'light': (AppColors.lightScheme, AppSemanticColors.light),
+        'dark': (AppColors.darkScheme, AppSemanticColors.dark),
+      };
 
   for (final MapEntry<String, (ColorScheme, AppSemanticColors)> e
       in themes.entries) {

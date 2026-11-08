@@ -6,11 +6,9 @@ abstract final class AppTypography {
   ];
 
   static TextTheme textTheme(Brightness brightness, ColorScheme scheme) {
-    final TextTheme base =
-        ThemeData(brightness: brightness, useMaterial3: true).textTheme.apply(
-              bodyColor: scheme.onSurface,
-              displayColor: scheme.onSurface,
-            );
+    final TextTheme base = ThemeData(brightness: brightness, useMaterial3: true)
+        .textTheme
+        .apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
     return base.copyWith(
       headlineMedium: base.headlineMedium?.copyWith(
         fontWeight: FontWeight.w700,
