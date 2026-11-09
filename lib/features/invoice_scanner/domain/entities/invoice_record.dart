@@ -37,6 +37,7 @@ final class InvoiceRecord extends Equatable {
     required this.createdAt,
     required this.updatedAt,
     this.invoice,
+    this.extractedInvoice,
     this.failureKind,
     this.savedAt,
     this.remoteSyncedAt,
@@ -82,14 +83,21 @@ final class InvoiceRecord extends Equatable {
   final int attemptCount;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  /// The current (possibly user-edited) invoice data.
   final Invoice? invoice;
+
+  /// Snapshot of what the model returned, kept only while the record is in
+  /// review so saving can report which fields the user corrected. Erased by
+  /// [markSaved] and [markDeleted].
+  final Invoice? extractedInvoice;
   final InvoiceErrorKind? failureKind;
   final DateTime? savedAt;
 
   /// Reserved for the later sync phase. Nothing writes it in Phase 1.
   final DateTime? remoteSyncedAt;
 
-  /// Soft delete marker, reserved for sync. Never queried as "live".
+  /// Tombstone marker, reserved for sync. Never queried as "live".
   final DateTime? deletedAt;
 
   bool get isDeleted => deletedAt != null;
@@ -121,7 +129,7 @@ final class InvoiceRecord extends Equatable {
     );
   }
 
-  /// extracting -> needsReview.
+  /// extracting -> needsReview. Keeps [extracted] as the snapshot.
   InvoiceRecord markNeedsReview(Invoice extracted, DateTime now) {
     _require(const <InvoiceStatus>{
       InvoiceStatus.extracting,
@@ -130,6 +138,7 @@ final class InvoiceRecord extends Equatable {
       updatedAt: now,
       status: InvoiceStatus.needsReview,
       invoice: () => extracted,
+      extractedInvoice: () => extracted,
       failureKind: () => null,
     );
   }
@@ -148,6 +157,7 @@ final class InvoiceRecord extends Equatable {
   }
 
   /// Autosaves review edits (survives backgrounding). needsReview only.
+  /// The extraction snapshot is untouched.
   InvoiceRecord withEditedInvoice(Invoice edited, DateTime now) {
     _require(const <InvoiceStatus>{
       InvoiceStatus.needsReview,
@@ -155,14 +165,15 @@ final class InvoiceRecord extends Equatable {
     return _copy(updatedAt: now, invoice: () => edited);
   }
 
-  /// needsReview -> saved. Clears [imagePaths]; the caller deletes the files
-  /// after this record is persisted.
+  /// needsReview -> saved. Clears [imagePaths] and the extraction snapshot;
+  /// the caller deletes the files after this record is persisted.
   InvoiceRecord markSaved(Invoice confirmed, DateTime now) {
     _require(const <InvoiceStatus>{InvoiceStatus.needsReview}, 'markSaved');
     return _copy(
       updatedAt: now,
       status: InvoiceStatus.saved,
       invoice: () => confirmed,
+      extractedInvoice: () => null,
       imagePaths: const <String>[],
       failureKind: () => null,
       savedAt: () => now,
@@ -170,16 +181,17 @@ final class InvoiceRecord extends Equatable {
   }
 
   /// Any status. Turns the record into a tombstone for the later sync
-  /// phase: [deletedAt] is set and the extracted [invoice], [failureKind]
-  /// and [imagePaths] are erased (deleting an invoice deletes its data).
-  /// The caller deletes the image files, reading [imagePaths] first.
-  /// Idempotent: an existing [deletedAt] is kept. A tombstone rejects every
-  /// other transition.
+  /// phase: [deletedAt] is set and the extracted [invoice], the snapshot,
+  /// [failureKind] and [imagePaths] are erased (deleting an invoice deletes
+  /// its data). The caller deletes the image files, reading [imagePaths]
+  /// first. Idempotent: an existing [deletedAt] is kept. A tombstone rejects
+  /// every other transition.
   InvoiceRecord markDeleted(DateTime now) {
     return _copy(
       updatedAt: now,
       imagePaths: const <String>[],
       invoice: () => null,
+      extractedInvoice: () => null,
       failureKind: () => null,
       deletedAt: () => deletedAt ?? now,
     );
@@ -200,6 +212,7 @@ final class InvoiceRecord extends Equatable {
     List<String>? imagePaths,
     int? attemptCount,
     Nullable<Invoice>? invoice,
+    Nullable<Invoice>? extractedInvoice,
     Nullable<InvoiceErrorKind>? failureKind,
     Nullable<DateTime>? savedAt,
     Nullable<DateTime>? deletedAt,
@@ -212,6 +225,9 @@ final class InvoiceRecord extends Equatable {
       createdAt: createdAt,
       updatedAt: updatedAt,
       invoice: invoice == null ? this.invoice : invoice(),
+      extractedInvoice: extractedInvoice == null
+          ? this.extractedInvoice
+          : extractedInvoice(),
       failureKind: failureKind == null ? this.failureKind : failureKind(),
       savedAt: savedAt == null ? this.savedAt : savedAt(),
       remoteSyncedAt: remoteSyncedAt,
@@ -228,6 +244,7 @@ final class InvoiceRecord extends Equatable {
     createdAt,
     updatedAt,
     invoice,
+    extractedInvoice,
     failureKind,
     savedAt,
     remoteSyncedAt,

@@ -4,19 +4,24 @@ import 'package:invoice_scanner/features/invoice_scanner/domain/failures/invoice
 /// Product metrics. Implementations must never receive invoice content:
 /// no vendor names, amounts, numbers, text, or file paths.
 abstract interface class ScanAnalytics {
-  /// One event per finished extraction attempt. [errorKind] null means
-  /// success. Failure rate = events with an error / all events.
-  /// [captureToResult] runs from capture to this attempt's end, so it
-  /// includes any time spent waiting in the offline queue.
+  /// One event per finished extraction attempt, except user cancellations.
+  /// [errorKind] null means success. Failure rate = events with an error /
+  /// all events. [captureToResult] runs from capture to this attempt's end,
+  /// so it includes any time spent waiting in the offline queue.
   void extractionFinished({
     required Duration captureToResult,
     required int attempt,
     InvoiceErrorKind? errorKind,
   });
 
-  /// The user changed [field] during review. Per-field correction rate =
-  /// corrections / reviews.
+  /// The user changed [field] before saving. Emitted once per field kind per
+  /// saved invoice (editing three line totals is one `lineTotal` event).
   void fieldCorrected(InvoiceField field);
+
+  /// A reviewed invoice was saved. [correctedFieldCount] is the number of
+  /// distinct field kinds changed (0 means the model was right). This is the
+  /// denominator for per-field correction rate.
+  void invoiceSaved({required int correctedFieldCount});
 }
 
 /// Default sink: drops everything.
@@ -32,4 +37,7 @@ final class NoopScanAnalytics implements ScanAnalytics {
 
   @override
   void fieldCorrected(InvoiceField field) {}
+
+  @override
+  void invoiceSaved({required int correctedFieldCount}) {}
 }
