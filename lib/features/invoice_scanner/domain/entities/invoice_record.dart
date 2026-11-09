@@ -43,16 +43,20 @@ final class InvoiceRecord extends Equatable {
     this.deletedAt,
   }) : assert(attemptCount >= 0, 'attemptCount must not be negative'),
        assert(
-         status != InvoiceStatus.needsReview || invoice != null,
-         'needsReview requires an invoice',
+         status != InvoiceStatus.needsReview ||
+             invoice != null ||
+             deletedAt != null,
+         'needsReview requires an invoice (tombstones excepted)',
        ),
        assert(
-         status != InvoiceStatus.saved || invoice != null,
-         'saved requires an invoice',
+         status != InvoiceStatus.saved || invoice != null || deletedAt != null,
+         'saved requires an invoice (tombstones excepted)',
        ),
        assert(
-         status != InvoiceStatus.failed || failureKind != null,
-         'failed requires a failureKind',
+         status != InvoiceStatus.failed ||
+             failureKind != null ||
+             deletedAt != null,
+         'failed requires a failureKind (tombstones excepted)',
        );
 
   factory InvoiceRecord.queued({
@@ -165,17 +169,26 @@ final class InvoiceRecord extends Equatable {
     );
   }
 
-  /// Any status. Soft delete: clears [imagePaths]; the caller deletes the
-  /// files. Idempotent: an existing [deletedAt] is kept.
+  /// Any status. Turns the record into a tombstone for the later sync
+  /// phase: [deletedAt] is set and the extracted [invoice], [failureKind]
+  /// and [imagePaths] are erased (deleting an invoice deletes its data).
+  /// The caller deletes the image files, reading [imagePaths] first.
+  /// Idempotent: an existing [deletedAt] is kept. A tombstone rejects every
+  /// other transition.
   InvoiceRecord markDeleted(DateTime now) {
     return _copy(
       updatedAt: now,
       imagePaths: const <String>[],
+      invoice: () => null,
+      failureKind: () => null,
       deletedAt: () => deletedAt ?? now,
     );
   }
 
   void _require(Set<InvoiceStatus> allowed, String operation) {
+    if (isDeleted) {
+      throw StateError('InvoiceRecord is deleted and cannot $operation');
+    }
     if (!allowed.contains(status)) {
       throw StateError('InvoiceRecord in ${status.name} cannot $operation');
     }

@@ -129,7 +129,7 @@ void main() {
         .markNeedsReview(extracted, t1)
         .markSaved(extracted, t1)
         .markDeleted(t2);
-    expect(savedThenDeleted.invoice, extracted);
+    expect(savedThenDeleted.invoice, isNull);
     expect(savedThenDeleted.isDeleted, isTrue);
   });
 
@@ -161,5 +161,28 @@ void main() {
   test('value equality', () {
     expect(queued(), queued());
     expect(queued(), isNot(queued().markExtracting(t1)));
+  });
+
+  test('delete erases the payload and leaves an immutable tombstone', () {
+    final InvoiceRecord review = queued()
+        .markExtracting(t1)
+        .markNeedsReview(extracted, t1);
+    final InvoiceRecord tomb = review.markDeleted(t2);
+    expect(tomb.invoice, isNull);
+    expect(tomb.failureKind, isNull);
+    expect(tomb.imagePaths, isEmpty);
+    expect(tomb.status, InvoiceStatus.needsReview);
+    expect(tomb.id, review.id);
+    expect(() => tomb.withEditedInvoice(edited, t2), throwsStateError);
+    expect(() => tomb.markSaved(extracted, t2), throwsStateError);
+    expect(() => tomb.markExtracting(t2), throwsStateError);
+    expect(() => tomb.markPending(t2), throwsStateError);
+    expect(tomb.markDeleted(DateTime.utc(2026, 11, 8, 11)).deletedAt, t2);
+
+    final InvoiceRecord failedTomb = queued()
+        .markFailed(InvoiceErrorKind.network, t1)
+        .markDeleted(t2);
+    expect(failedTomb.failureKind, isNull);
+    expect(failedTomb.status, InvoiceStatus.failed);
   });
 }
