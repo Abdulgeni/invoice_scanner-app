@@ -150,4 +150,24 @@ void main() {
       expect(store.deleted, isEmpty);
     },
   );
+
+  test('deletes the scanner source files after a successful capture', () async {
+    scanner.result = <String>['scan/1.jpg', 'scan/2.jpg'];
+    store.files.addAll(<String>['scan/1.jpg', 'scan/2.jpg']);
+    expect(await run(), isA<CaptureSucceeded>());
+    expect(store.files, <String>{'managed/id-1_0.jpg', 'managed/id-1_1.jpg'});
+  });
+
+  test(
+    'deletes the scanner source files when rejecting too many pages',
+    () async {
+      final List<String> six = <String>[
+        for (int i = 1; i <= 6; i++) 'scan/$i.jpg',
+      ];
+      scanner.result = six;
+      store.files.addAll(six);
+      expect(await run(), isA<CaptureTooManyPages>());
+      expect(store.files, isEmpty);
+    },
+  );
 }

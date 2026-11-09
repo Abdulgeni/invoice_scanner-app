@@ -80,7 +80,10 @@ class CaptureInvoice {
         maxPages: _maxPages + 1,
       );
       if (pages == null || pages.isEmpty) return const CaptureCancelled();
-      if (pages.length > _maxPages) return CaptureTooManyPages(_maxPages);
+      if (pages.length > _maxPages) {
+        await _imageStore.deleteFiles(pages);
+        return CaptureTooManyPages(_maxPages);
+      }
       cancel.throwIfCancelled();
 
       final String id = _newId();
@@ -107,6 +110,9 @@ class CaptureInvoice {
           ),
         );
       }
+      // The compressed copy replaces the full-resolution scans. On failure
+      // or cancel they stay until the launch cleanup.
+      await _imageStore.deleteFiles(pages);
       return CaptureSucceeded(record);
     } on Exception catch (error) {
       if (compressed.isNotEmpty) await _imageStore.deleteFiles(compressed);
