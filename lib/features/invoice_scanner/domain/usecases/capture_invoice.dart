@@ -49,13 +49,13 @@ class CaptureInvoice {
     required Clock clock,
     required IdGenerator newId,
     int maxPages = InvoiceLimits.maxPages,
-  }) : _scanner = scanner,
-       _preprocessor = preprocessor,
-       _repository = repository,
-       _imageStore = imageStore,
-       _clock = clock,
-       _newId = newId,
-       _maxPages = maxPages;
+  })  : _scanner = scanner,
+        _preprocessor = preprocessor,
+        _repository = repository,
+        _imageStore = imageStore,
+        _clock = clock,
+        _newId = newId,
+        _maxPages = maxPages;
 
   final DocumentScanner _scanner;
   final ImagePreprocessor _preprocessor;
@@ -68,13 +68,16 @@ class CaptureInvoice {
   Future<CaptureResult> call({
     required ScanSource source,
     required CancellationToken cancel,
+
+    /// Called once the scanner's pages are accepted (not too many, not
+    /// cancelled), just before compression starts. Lets the UI move from
+    /// "scanner open" to "optimizing".
+    void Function()? onPagesAccepted,
   }) async {
     List<String> compressed = const <String>[];
     try {
       cancel.throwIfCancelled();
 
-      // Ask for one page more than allowed so an over-limit scan is
-      // detectable on platforms that ignore the limit, then reject it.
       final List<String>? pages = await _scanner.scan(
         source: source,
         maxPages: _maxPages + 1,
@@ -85,6 +88,7 @@ class CaptureInvoice {
         return CaptureTooManyPages(_maxPages);
       }
       cancel.throwIfCancelled();
+      onPagesAccepted?.call();
 
       final String id = _newId();
       compressed = await _preprocessor.compress(
@@ -101,8 +105,6 @@ class CaptureInvoice {
       );
       final bool inserted = await _repository.insertIfAbsent(record);
       if (!inserted) {
-        // Never delete here: output names derive from the id, so these files
-        // may belong to the row that already exists.
         return const CaptureFailed(
           InvoiceFailure(
             InvoiceErrorKind.unknown,
@@ -110,8 +112,6 @@ class CaptureInvoice {
           ),
         );
       }
-      // The compressed copy replaces the full-resolution scans. On failure
-      // or cancel they stay until the launch cleanup.
       await _imageStore.deleteFiles(pages);
       return CaptureSucceeded(record);
     } on Exception catch (error) {

@@ -17,10 +17,10 @@ import 'package:invoice_scanner/features/invoice_scanner/domain/value_objects/mo
 
 final DateTime testT0 = DateTime.utc(2026, 11, 8, 10);
 
-Clock fixedClock(DateTime time) =>
-    () => time;
+Clock fixedClock(DateTime time) => () => time;
 
-Money usd(int minorUnits) => Money.tryFromMinorUnits(minorUnits, Currency.usd)!;
+Money usd(int minorUnits) =>
+    Money.tryFromMinorUnits(minorUnits, Currency.usd)!;
 
 /// Consistent invoice: lines 1000 + 2000 = subtotal 3000, +300 tax = 3300.
 Invoice sampleInvoice({String vendor = 'Acme'}) {
@@ -112,7 +112,8 @@ class FakeInvoiceRepository implements InvoiceRepository {
   List<InvoiceRecord> _saved() {
     final List<InvoiceRecord> saved = rows.values
         .where(
-          (InvoiceRecord r) => !r.isDeleted && r.status == InvoiceStatus.saved,
+          (InvoiceRecord r) =>
+              !r.isDeleted && r.status == InvoiceStatus.saved,
         )
         .toList();
     saved.sort(
@@ -169,6 +170,9 @@ class FakeDocumentScanner implements DocumentScanner {
   ScanSource? lastSource;
   int? lastMaxPages;
 
+  /// When set, `scan` waits on it (to keep the scanner "open").
+  Completer<List<String>?>? gate;
+
   @override
   Future<List<String>?> scan({
     required ScanSource source,
@@ -179,6 +183,8 @@ class FakeDocumentScanner implements DocumentScanner {
     lastMaxPages = maxPages;
     final Object? e = error;
     if (e != null) throw e;
+    final Completer<List<String>?>? g = gate;
+    if (g != null) return g.future;
     return result;
   }
 }
@@ -192,6 +198,9 @@ class FakeImagePreprocessor implements ImagePreprocessor {
 
   /// Runs after outputs are written, before returning (to cancel mid-flight).
   void Function()? afterCompress;
+
+  /// When set, `compress` waits on it after writing its outputs.
+  Completer<void>? gate;
 
   @override
   Future<List<String>> compress({
@@ -208,6 +217,7 @@ class FakeImagePreprocessor implements ImagePreprocessor {
     ];
     store.files.addAll(out);
     afterCompress?.call();
+    await gate?.future;
     return out;
   }
 }
