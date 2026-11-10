@@ -5,25 +5,15 @@ import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/invoi
 import 'package:invoice_scanner/features/invoice_scanner/presentation/l10n/error_messages.dart';
 import 'package:invoice_scanner/l10n/app_localizations.dart';
 
-enum CaptureStage { opening, optimizing }
-
+/// Shown while the native scanner is open.
 class CaptureProgressView extends StatelessWidget {
-  const CaptureProgressView({
-    required this.stage,
-    required this.onCancel,
-    super.key,
-  });
+  const CaptureProgressView({required this.onCancel, super.key});
 
-  final CaptureStage stage;
   final VoidCallback onCancel;
 
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final String label = switch (stage) {
-      CaptureStage.opening => l10n.capturingOpening,
-      CaptureStage.optimizing => l10n.stageOptimizing,
-    };
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -37,7 +27,7 @@ class CaptureProgressView extends StatelessWidget {
                 Semantics(
                   liveRegion: true,
                   child: Text(
-                    label,
+                    l10n.capturingOpening,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),

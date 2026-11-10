@@ -17,10 +17,10 @@ import 'package:invoice_scanner/features/invoice_scanner/domain/value_objects/mo
 
 final DateTime testT0 = DateTime.utc(2026, 11, 8, 10);
 
-Clock fixedClock(DateTime time) => () => time;
+Clock fixedClock(DateTime time) =>
+    () => time;
 
-Money usd(int minorUnits) =>
-    Money.tryFromMinorUnits(minorUnits, Currency.usd)!;
+Money usd(int minorUnits) => Money.tryFromMinorUnits(minorUnits, Currency.usd)!;
 
 /// Consistent invoice: lines 1000 + 2000 = subtotal 3000, +300 tax = 3300.
 Invoice sampleInvoice({String vendor = 'Acme'}) {
@@ -112,8 +112,7 @@ class FakeInvoiceRepository implements InvoiceRepository {
   List<InvoiceRecord> _saved() {
     final List<InvoiceRecord> saved = rows.values
         .where(
-          (InvoiceRecord r) =>
-              !r.isDeleted && r.status == InvoiceStatus.saved,
+          (InvoiceRecord r) => !r.isDeleted && r.status == InvoiceStatus.saved,
         )
         .toList();
     saved.sort(

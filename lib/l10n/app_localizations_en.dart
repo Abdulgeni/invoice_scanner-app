@@ -52,7 +52,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorNetwork =>
-      'You appear to be offline. Connect to the internet and try again.';
+      'You appear to be offline. Your scan is saved, so you can try again once you\'re back online.';
 
   @override
   String get errorTimeout =>
@@ -235,4 +235,60 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get draftNotSavedNotice =>
       'Your latest edits haven\'t been saved yet.';
+
+  @override
+  String capturedPagesLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pages',
+      one: '1 page',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String capturedInvoiceSemantics(String pages) {
+    return 'Captured invoice, $pages';
+  }
+
+  @override
+  String stageStepCounter(int current, int total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String stageSemantics(String step, String label) {
+    return '$step, $label';
+  }
+
+  @override
+  String get errorTitleNetwork => 'You\'re offline';
+
+  @override
+  String get errorTitleTimeout => 'That took too long';
+
+  @override
+  String get errorTitleQuota => 'Scanning limit reached';
+
+  @override
+  String get errorTitleAppCheck => 'Update needed';
+
+  @override
+  String get errorTitleSafety => 'This image can\'t be used';
+
+  @override
+  String get errorTitleEmpty => 'Nothing to read here';
+
+  @override
+  String get errorTitleMalformed => 'We couldn\'t make sense of it';
+
+  @override
+  String get errorTitleNotInvoice => 'This doesn\'t look like an invoice';
+
+  @override
+  String get errorTitleCancelled => 'Scan cancelled';
+
+  @override
+  String get errorTitleUnknown => 'Something went wrong';
 }

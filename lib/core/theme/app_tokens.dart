@@ -37,6 +37,14 @@ abstract final class AppSizes {
   static const double pageDotActive = 24;
   static const double thumbnail = 120;
   static const double maxContentWidth = 640;
+
+  static const double pageAspectRatio = 210 / 297;
+  static const int pageStackMaxVisible = 3;
+  static const double pageStackOffset = 10;
+  static const double sweepBandFraction = 0.28;
+  static const double sweepLineWidth = 2;
+  static const double stageSegmentHeight = 4;
+  static const double failurePreviewHeight = 200;
 }
 
 abstract final class AppElevation {
@@ -51,8 +59,6 @@ abstract final class AppShadows {
   ];
 }
 
-/// Global switch for Pressable haptics. Module 6 wires this to a preference;
-/// for Phase 1 it is a compile-time constant so no settings screen is needed.
 const bool kHapticsEnabled = true;
 
 abstract final class AppMotion {
@@ -65,9 +71,10 @@ abstract final class AppMotion {
   static const Curve exit = Curves.easeInCubic;
 
   static const double pressScale = 0.97;
-
-  /// Lowest scale of the pulsing "working" icon.
   static const double pulseMinScale = 0.92;
+
+  static const Duration sweepCycle = Duration(milliseconds: 2200);
+  static const Duration completionBeat = Duration(milliseconds: 700);
 
   static bool reduced(BuildContext context) =>
       MediaQuery.maybeDisableAnimationsOf(context) ?? false;
@@ -79,7 +86,11 @@ abstract final class AppMotion {
 abstract final class AppZoom {
   static const double min = 1;
   static const double max = 4;
-
-  /// Scale above which a page counts as zoomed.
   static const double epsilon = 0.01;
+}
+
+abstract final class AppOpacity {
+  static const double dimScrim = 0.45;
+  static const double sweepTrail = 0.28;
+  static const double sweepLine = 0.9;
 }

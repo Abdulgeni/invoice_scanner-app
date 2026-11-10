@@ -21,9 +21,11 @@ import 'package:invoice_scanner/features/invoice_scanner/domain/validation/valid
 import 'package:invoice_scanner/features/invoice_scanner/domain/value_objects/currency.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/invoice_scanner_bloc.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/capture_status_views.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/extraction_failure_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/flow_stage_views.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/home_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/preview_screen.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/processing_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/scanner_flow_screen.dart';
 
 import '../../../../support/fakes.dart';
@@ -137,8 +139,10 @@ void main() {
 
     final Map<InvoiceScannerState, Type> routes = <InvoiceScannerState, Type>{
       const InvoiceCapturing(source: ScanSource.camera): CaptureProgressView,
-      const InvoicePreprocessing(source: ScanSource.camera):
-          CaptureProgressView,
+      const InvoicePreprocessing(
+        source: ScanSource.camera,
+        pagePaths: pages,
+      ): ProcessingScreen,
       const InvoiceCaptureFailure(reason: CaptureFailureReason.unknown):
           CaptureFailureView,
       const InvoiceImageReady(
@@ -150,7 +154,7 @@ void main() {
         recordId: 'a',
         pagePaths: pages,
         source: ScanSource.camera,
-      ): ExtractingView,
+      ): ProcessingScreen,
       const InvoiceExtractionFailure(
         recordId: 'a',
         pagePaths: pages,
@@ -158,7 +162,7 @@ void main() {
         kind: InvoiceErrorKind.timeout,
         canRetry: true,
         suggestsRetake: false,
-      ): ExtractionFailureView,
+      ): ExtractionFailureScreen,
       InvoiceReviewing(
         recordId: 'a',
         pagePaths: pages,

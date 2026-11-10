@@ -18,7 +18,7 @@
   "stageValidating": "Checking totals",
 
   "errorTitle": "Couldn't read this invoice",
-  "errorNetwork": "You appear to be offline. Connect to the internet and try again.",
+  "errorNetwork": "You appear to be offline. Your scan is saved, so you can try again once you're back online.",
   "@errorNetwork": {
     "description": "Module 6 will replace this with an offline-queue promise once that queue ships."
   },
@@ -139,5 +139,55 @@
   "savingLabel": "Saving…",
   "savedTitle": "Invoice saved",
   "saveFailedNotice": "Couldn't save. Your edits are kept. Try again.",
-  "draftNotSavedNotice": "Your latest edits haven't been saved yet."
+  "draftNotSavedNotice": "Your latest edits haven't been saved yet.",
+
+  "capturedPagesLabel": "{count, plural, =1{1 page} other{{count} pages}}",
+  "@capturedPagesLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "capturedInvoiceSemantics": "Captured invoice, {pages}",
+  "@capturedInvoiceSemantics": {
+    "placeholders": {
+      "pages": {
+        "type": "String"
+      }
+    }
+  },
+  "stageStepCounter": "Step {current} of {total}",
+  "@stageStepCounter": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "stageSemantics": "{step}, {label}",
+  "@stageSemantics": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+
+  "errorTitleNetwork": "You're offline",
+  "errorTitleTimeout": "That took too long",
+  "errorTitleQuota": "Scanning limit reached",
+  "errorTitleAppCheck": "Update needed",
+  "errorTitleSafety": "This image can't be used",
+  "errorTitleEmpty": "Nothing to read here",
+  "errorTitleMalformed": "We couldn't make sense of it",
+  "errorTitleNotInvoice": "This doesn't look like an invoice",
+  "errorTitleCancelled": "Scan cancelled",
+  "errorTitleUnknown": "Something went wrong"
 }

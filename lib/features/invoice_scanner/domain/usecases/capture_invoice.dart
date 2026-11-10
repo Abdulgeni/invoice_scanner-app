@@ -49,13 +49,13 @@ class CaptureInvoice {
     required Clock clock,
     required IdGenerator newId,
     int maxPages = InvoiceLimits.maxPages,
-  })  : _scanner = scanner,
-        _preprocessor = preprocessor,
-        _repository = repository,
-        _imageStore = imageStore,
-        _clock = clock,
-        _newId = newId,
-        _maxPages = maxPages;
+  }) : _scanner = scanner,
+       _preprocessor = preprocessor,
+       _repository = repository,
+       _imageStore = imageStore,
+       _clock = clock,
+       _newId = newId,
+       _maxPages = maxPages;
 
   final DocumentScanner _scanner;
   final ImagePreprocessor _preprocessor;
@@ -72,7 +72,7 @@ class CaptureInvoice {
     /// Called once the scanner's pages are accepted (not too many, not
     /// cancelled), just before compression starts. Lets the UI move from
     /// "scanner open" to "optimizing".
-    void Function()? onPagesAccepted,
+    void Function(List<String> pages)? onPagesAccepted,
   }) async {
     List<String> compressed = const <String>[];
     try {
@@ -88,7 +88,7 @@ class CaptureInvoice {
         return CaptureTooManyPages(_maxPages);
       }
       cancel.throwIfCancelled();
-      onPagesAccepted?.call();
+      onPagesAccepted?.call(pages);
 
       final String id = _newId();
       compressed = await _preprocessor.compress(

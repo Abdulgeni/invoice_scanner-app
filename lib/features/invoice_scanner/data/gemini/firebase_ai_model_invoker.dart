@@ -8,7 +8,7 @@ import 'package:invoice_scanner/features/invoice_scanner/data/gemini/model_invok
 /// The only code that talks to `firebase_ai` model objects.
 class FirebaseAiModelInvoker {
   FirebaseAiModelInvoker({required FirebaseAI Function() backend})
-      : _backend = backend;
+    : _backend = backend;
 
   final FirebaseAI Function() _backend;
 
@@ -39,8 +39,9 @@ class FirebaseAiModelInvoker {
     return GeminiRawResult(
       text: response.text,
       blockReason: response.promptFeedback?.blockReason?.name,
-      finishReason:
-          candidates.isEmpty ? null : candidates.first.finishReason?.name,
+      finishReason: candidates.isEmpty
+          ? null
+          : candidates.first.finishReason?.name,
     );
   }
 }

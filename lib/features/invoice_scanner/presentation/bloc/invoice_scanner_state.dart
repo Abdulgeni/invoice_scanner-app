@@ -24,12 +24,15 @@ final class InvoiceCapturing extends InvoiceScannerState {
 
 /// Pages came back; they are being compressed ("Optimizing").
 final class InvoicePreprocessing extends InvoiceScannerState {
-  const InvoicePreprocessing({required this.source});
+  const InvoicePreprocessing({required this.source, required this.pagePaths});
 
   final ScanSource source;
 
+  /// The scanner's own files, valid until compression finishes.
+  final List<String> pagePaths;
+
   @override
-  List<Object?> get props => <Object?>[source];
+  List<Object?> get props => <Object?>[source, pagePaths];
 }
 
 enum CaptureFailureReason {

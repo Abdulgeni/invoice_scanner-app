@@ -138,9 +138,14 @@ class InvoiceScannerBloc
     final CaptureResult result = await _captureInvoice(
       source: source,
       cancel: token,
-      onPagesAccepted: () {
+      onPagesAccepted: (List<String> pages) {
         if (!_stale(epoch) && !emit.isDone) {
-          emit(InvoicePreprocessing(source: source));
+          emit(
+            InvoicePreprocessing(
+              source: source,
+              pagePaths: List<String>.unmodifiable(pages),
+            ),
+          );
         }
       },
     );

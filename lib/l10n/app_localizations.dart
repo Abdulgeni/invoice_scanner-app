@@ -181,7 +181,7 @@ abstract class AppLocalizations {
   /// Module 6 will replace this with an offline-queue promise once that queue ships.
   ///
   /// In en, this message translates to:
-  /// **'You appear to be offline. Connect to the internet and try again.'**
+  /// **'You appear to be offline. Your scan is saved, so you can try again once you\'re back online.'**
   String get errorNetwork;
 
   /// No description provided for @errorTimeout.
@@ -477,6 +477,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your latest edits haven\'t been saved yet.'**
   String get draftNotSavedNotice;
+
+  /// No description provided for @capturedPagesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 page} other{{count} pages}}'**
+  String capturedPagesLabel(int count);
+
+  /// No description provided for @capturedInvoiceSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Captured invoice, {pages}'**
+  String capturedInvoiceSemantics(String pages);
+
+  /// No description provided for @stageStepCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String stageStepCounter(int current, int total);
+
+  /// No description provided for @stageSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{step}, {label}'**
+  String stageSemantics(String step, String label);
+
+  /// No description provided for @errorTitleNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline'**
+  String get errorTitleNetwork;
+
+  /// No description provided for @errorTitleTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'That took too long'**
+  String get errorTitleTimeout;
+
+  /// No description provided for @errorTitleQuota.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning limit reached'**
+  String get errorTitleQuota;
+
+  /// No description provided for @errorTitleAppCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Update needed'**
+  String get errorTitleAppCheck;
+
+  /// No description provided for @errorTitleSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'This image can\'t be used'**
+  String get errorTitleSafety;
+
+  /// No description provided for @errorTitleEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to read here'**
+  String get errorTitleEmpty;
+
+  /// No description provided for @errorTitleMalformed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t make sense of it'**
+  String get errorTitleMalformed;
+
+  /// No description provided for @errorTitleNotInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'This doesn\'t look like an invoice'**
+  String get errorTitleNotInvoice;
+
+  /// No description provided for @errorTitleCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan cancelled'**
+  String get errorTitleCancelled;
+
+  /// No description provided for @errorTitleUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get errorTitleUnknown;
 }
 
 class _AppLocalizationsDelegate

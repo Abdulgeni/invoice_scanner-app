@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -6,15 +8,18 @@ import 'package:invoice_scanner/features/invoice_scanner/domain/entities/invoice
 import 'package:invoice_scanner/features/invoice_scanner/domain/repositories/document_scanner.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/invoice_scanner_bloc.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/capture_status_views.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/extraction_failure_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/flow_stage_views.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/home_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/preview_screen.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/processing_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/widgets/scan_guidance_sheet.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/widgets/stage_progress.dart';
 import 'package:invoice_scanner/l10n/app_localizations.dart';
 
 /// Routes every bloc state to a screen and owns the navigation-level
 /// behavior: scan guidance, discard confirmation, the system back button,
-/// notices, and app-lifecycle forwarding.
+/// notices, the "checking totals" completion beat, and lifecycle forwarding.
 class ScannerFlowScreen extends StatefulWidget {
   const ScannerFlowScreen({required this.watchRecent, super.key});
 
@@ -29,16 +34,24 @@ class _ScannerFlowScreenState extends State<ScannerFlowScreen>
   final ScanGuidancePolicy _guidance = ScanGuidancePolicy();
   ScanSource _lastSource = ScanSource.camera;
 
+  InvoiceScannerState? _last;
+
+  /// Set while the "checking totals" beat is showing after a finished read.
+  List<String>? _finishingPages;
+  Timer? _beat;
+
   InvoiceScannerBloc get _bloc => context.read<InvoiceScannerBloc>();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _last = context.read<InvoiceScannerBloc>().state;
   }
 
   @override
   void dispose() {
+    _beat?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -47,6 +60,8 @@ class _ScannerFlowScreenState extends State<ScannerFlowScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) _bloc.add(const AppPaused());
   }
+
+  // --- actions ---------------------------------------------------------
 
   Future<void> _scan() async {
     if (_guidance.shouldShow) {
@@ -84,13 +99,81 @@ class _ScannerFlowScreenState extends State<ScannerFlowScreen>
     if (confirmed == true && mounted) _bloc.add(const DiscardRequested());
   }
 
+  /// The system back button.
+  void _onBack(InvoiceScannerState state) {
+    switch (state) {
+      case InvoiceScannerInitial():
+        break;
+      case InvoiceCapturing() || InvoicePreprocessing() || InvoiceExtracting():
+        _bloc.add(const CancelRequested());
+      case InvoiceCaptureFailure() || InvoiceSaved():
+        _bloc.add(const ResetRequested());
+      case InvoiceExtractionFailure():
+        _bloc.add(const KeepImageRequested());
+      case InvoiceImageReady() || InvoiceReviewing():
+        _confirmDiscard();
+      case InvoiceSaving():
+        break;
+    }
+  }
+
+  // --- state changes ---------------------------------------------------
+
+  void _onState(BuildContext context, InvoiceScannerState state) {
+    final InvoiceScannerState? previous = _last;
+    _last = state;
+
+    if (previous is InvoiceExtracting &&
+        state is InvoiceReviewing &&
+        !AppMotion.reduced(context)) {
+      _startBeat(previous.pagePaths);
+    } else if (state is! InvoiceReviewing) {
+      _endBeat();
+    }
+
+    if (state is InvoiceReviewing &&
+        state.notice != null &&
+        (previous is! InvoiceReviewing || previous.notice != state.notice)) {
+      _showNotice(context, state.notice!);
+    }
+  }
+
+  void _startBeat(List<String> pages) {
+    _beat?.cancel();
+    setState(() => _finishingPages = pages);
+    _beat = Timer(AppMotion.completionBeat, () {
+      if (mounted) setState(() => _finishingPages = null);
+    });
+  }
+
+  void _endBeat() {
+    _beat?.cancel();
+    _beat = null;
+    if (_finishingPages != null) setState(() => _finishingPages = null);
+  }
+
+  void _showNotice(BuildContext context, ReviewNotice notice) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final String message = switch (notice) {
+      ReviewNotice.saveFailed => l10n.saveFailedNotice,
+      ReviewNotice.draftNotSaved => l10n.draftNotSavedNotice,
+    };
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  // --- routing ---------------------------------------------------------
+
+  /// Identifies the screen, not the data: edits inside one stage keep the
+  /// same key (no transition replay), and optimizing and reading share the
+  /// processing screen so the sweep continues while only the stage changes.
   String _stageOf(InvoiceScannerState state) => switch (state) {
     InvoiceScannerInitial() => 'home',
     InvoiceCapturing() => 'capturing',
-    InvoicePreprocessing() => 'optimizing',
+    InvoicePreprocessing() || InvoiceExtracting() => 'processing',
     InvoiceCaptureFailure() => 'captureFailure',
     InvoiceImageReady() => 'preview',
-    InvoiceExtracting() => 'reading',
     InvoiceExtractionFailure() => 'failure',
     InvoiceReviewing() => 'review',
     InvoiceSaving() => 'saving',
@@ -106,11 +189,16 @@ class _ScannerFlowScreenState extends State<ScannerFlowScreen>
         onShowTips: () => showScanGuidanceSheet(context, showStart: false),
       ),
       InvoiceCapturing() => CaptureProgressView(
-        stage: CaptureStage.opening,
         onCancel: () => _bloc.add(const CancelRequested()),
       ),
-      InvoicePreprocessing() => CaptureProgressView(
-        stage: CaptureStage.optimizing,
+      InvoicePreprocessing(:final pagePaths) => ProcessingScreen(
+        stage: ProcessingStage.optimizing,
+        pagePaths: pagePaths,
+        onCancel: () => _bloc.add(const CancelRequested()),
+      ),
+      InvoiceExtracting(:final pagePaths) => ProcessingScreen(
+        stage: ProcessingStage.reading,
+        pagePaths: pagePaths,
         onCancel: () => _bloc.add(const CancelRequested()),
       ),
       InvoiceCaptureFailure(:final reason, :final maxPages) =>
@@ -126,15 +214,12 @@ class _ScannerFlowScreenState extends State<ScannerFlowScreen>
         onRetake: () => _bloc.add(const RetakeRequested()),
         onDiscard: _confirmDiscard,
       ),
-      InvoiceExtracting(:final pagePaths) => ExtractingView(
-        firstPagePath: pagePaths.isEmpty ? null : pagePaths.first,
-        onCancel: () => _bloc.add(const CancelRequested()),
-      ),
-      final InvoiceExtractionFailure failure => ExtractionFailureView(
+      final InvoiceExtractionFailure failure => ExtractionFailureScreen(
         state: failure,
         onRetry: () => _bloc.add(const ExtractRequested()),
         onRetake: () => _bloc.add(const RetakeRequested()),
         onKeep: () => _bloc.add(const KeepImageRequested()),
+        onDiscard: _confirmDiscard,
       ),
       final InvoiceReviewing review => ReviewingStubView(
         state: review,
@@ -150,50 +235,39 @@ class _ScannerFlowScreenState extends State<ScannerFlowScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<InvoiceScannerBloc, InvoiceScannerState>(
-      listenWhen: (InvoiceScannerState previous, InvoiceScannerState current) {
-        if (current is! InvoiceReviewing || current.notice == null) {
-          return false;
-        }
-        return previous is! InvoiceReviewing ||
-            previous.notice != current.notice;
-      },
-      listener: (BuildContext context, InvoiceScannerState state) {
-        final AppLocalizations l10n = AppLocalizations.of(context);
-        final ReviewNotice? notice = (state as InvoiceReviewing).notice;
-        final String? message = switch (notice) {
-          ReviewNotice.saveFailed => l10n.saveFailedNotice,
-          ReviewNotice.draftNotSaved => l10n.draftNotSavedNotice,
-          null => null,
-        };
-        if (message == null) return;
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text(message)));
-      },
-      child: BlocBuilder<InvoiceScannerBloc, InvoiceScannerState>(
-        builder: (BuildContext context, InvoiceScannerState state) {
-          final bool previewing = state is InvoiceImageReady;
-          return PopScope(
-            canPop: !previewing,
-            onPopInvokedWithResult: (bool didPop, Object? result) {
-              if (!didPop && previewing) _confirmDiscard();
-            },
-            child: AnimatedSwitcher(
-              duration: AppMotion.resolve(context, AppMotion.base),
-              switchInCurve: AppMotion.standard,
-              switchOutCurve: AppMotion.exit,
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return FadeTransition(opacity: animation, child: child);
-              },
-              child: KeyedSubtree(
-                key: ValueKey<String>(_stageOf(state)),
-                child: _viewFor(context, state),
-              ),
-            ),
+    return BlocConsumer<InvoiceScannerBloc, InvoiceScannerState>(
+      listener: _onState,
+      builder: (BuildContext context, InvoiceScannerState state) {
+        final List<String>? finishing = _finishingPages;
+        final String key;
+        final Widget view;
+        if (finishing != null && state is InvoiceReviewing) {
+          key = 'processing';
+          view = ProcessingScreen(
+            stage: ProcessingStage.validating,
+            pagePaths: finishing,
           );
-        },
-      ),
+        } else {
+          key = _stageOf(state);
+          view = _viewFor(context, state);
+        }
+
+        return PopScope(
+          canPop: state is InvoiceScannerInitial,
+          onPopInvokedWithResult: (bool didPop, Object? result) {
+            if (!didPop) _onBack(state);
+          },
+          child: AnimatedSwitcher(
+            duration: AppMotion.resolve(context, AppMotion.base),
+            switchInCurve: AppMotion.standard,
+            switchOutCurve: AppMotion.exit,
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            child: KeyedSubtree(key: ValueKey<String>(key), child: view),
+          ),
+        );
+      },
     );
   }
 }

@@ -7,6 +7,7 @@ Future<void> pumpLocalized(
   WidgetTester tester,
   Widget home, {
   bool reduceMotion = false,
+  double textScale = 1,
   ThemeData? theme,
 }) async {
   await tester.pumpWidget(
@@ -15,9 +16,12 @@ Future<void> pumpLocalized(
       supportedLocales: AppLocalizations.supportedLocales,
       theme: theme ?? AppTheme.light,
       builder: (BuildContext context, Widget? child) {
-        if (!reduceMotion) return child!;
+        final MediaQueryData base = MediaQuery.of(context);
         return MediaQuery(
-          data: MediaQuery.of(context).copyWith(disableAnimations: true),
+          data: base.copyWith(
+            disableAnimations: reduceMotion || base.disableAnimations,
+            textScaler: TextScaler.linear(textScale),
+          ),
           child: child!,
         );
       },

@@ -170,4 +170,15 @@ void main() {
       expect(store.files, isEmpty);
     },
   );
+
+  test('onPagesAccepted receives the scanner pages in order', () async {
+    scanner.result = <String>['scan/1.jpg', 'scan/2.jpg'];
+    List<String>? received;
+    await capture(
+      source: ScanSource.camera,
+      cancel: cancel,
+      onPagesAccepted: (List<String> pages) => received = pages,
+    );
+    expect(received, <String>['scan/1.jpg', 'scan/2.jpg']);
+  });
 }
