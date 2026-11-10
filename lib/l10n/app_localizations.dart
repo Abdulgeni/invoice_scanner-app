@@ -255,6 +255,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a valid number, for example {example}.'**
   String validationInvalidNumber(String example);
+
+  /// No description provided for @scanInvoiceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan invoice'**
+  String get scanInvoiceAction;
+
+  /// No description provided for @homeHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan an invoice'**
+  String get homeHeroTitle;
+
+  /// No description provided for @homeHeroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture it, check the details, and save it in seconds.'**
+  String get homeHeroBody;
+
+  /// No description provided for @homeTipsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning tips'**
+  String get homeTipsTitle;
+
+  /// No description provided for @recentInvoicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent invoices'**
+  String get recentInvoicesTitle;
+
+  /// No description provided for @recentInvoicesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoices you save will appear here.'**
+  String get recentInvoicesEmpty;
+
+  /// No description provided for @invoiceUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed invoice'**
+  String get invoiceUnnamed;
+
+  /// No description provided for @recentNoTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'No total'**
+  String get recentNoTotal;
+
+  /// No description provided for @recentNoDate.
+  ///
+  /// In en, this message translates to:
+  /// **'No date'**
+  String get recentNoDate;
+
+  /// No description provided for @guidanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Before you scan'**
+  String get guidanceTitle;
+
+  /// No description provided for @guidanceLighting.
+  ///
+  /// In en, this message translates to:
+  /// **'Use even light and avoid glare or shadows.'**
+  String get guidanceLighting;
+
+  /// No description provided for @guidanceFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'Lay the page flat on a plain, dark surface.'**
+  String get guidanceFlat;
+
+  /// No description provided for @guidanceFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the whole page in the frame, edge to edge.'**
+  String get guidanceFrame;
+
+  /// No description provided for @guidanceMultiPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Long invoice? Scan up to {max} pages, in order.'**
+  String guidanceMultiPage(int max);
+
+  /// No description provided for @guidanceStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Open camera'**
+  String get guidanceStart;
+
+  /// No description provided for @previewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your scan'**
+  String get previewTitle;
+
+  /// No description provided for @previewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure every line is readable. Pinch to zoom.'**
+  String get previewHint;
+
+  /// No description provided for @previewPageCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {current} of {total}'**
+  String previewPageCounter(int current, int total);
+
+  /// No description provided for @previewPageSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice page {current} of {total}'**
+  String previewPageSemantics(int current, int total);
+
+  /// No description provided for @previewImageUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This page couldn\'t be shown.'**
+  String get previewImageUnavailable;
+
+  /// No description provided for @readInvoiceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Read invoice'**
+  String get readInvoiceAction;
+
+  /// No description provided for @discardAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discardAction;
+
+  /// No description provided for @discardConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard this scan?'**
+  String get discardConfirmTitle;
+
+  /// No description provided for @discardConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The captured pages will be deleted.'**
+  String get discardConfirmBody;
+
+  /// No description provided for @capturingOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening scanner…'**
+  String get capturingOpening;
+
+  /// No description provided for @captureErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t scan'**
+  String get captureErrorTitle;
+
+  /// No description provided for @captureErrorCameraDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera access is turned off. Turn it on in your device settings to scan invoices.'**
+  String get captureErrorCameraDenied;
+
+  /// No description provided for @captureErrorScannerUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The scanner couldn\'t start. Please try again.'**
+  String get captureErrorScannerUnavailable;
+
+  /// No description provided for @captureErrorStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your device storage isn\'t available right now. Please try again.'**
+  String get captureErrorStorage;
+
+  /// No description provided for @captureErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong while scanning. Please try again.'**
+  String get captureErrorUnknown;
+
+  /// No description provided for @doneAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get doneAction;
+
+  /// No description provided for @reviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review details'**
+  String get reviewTitle;
+
+  /// No description provided for @warningsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No warnings} =1{1 warning} other{{count} warnings}}'**
+  String warningsCount(int count);
+
+  /// No description provided for @savingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get savingLabel;
+
+  /// No description provided for @savedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice saved'**
+  String get savedTitle;
+
+  /// No description provided for @saveFailedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save. Your edits are kept. Try again.'**
+  String get saveFailedNotice;
+
+  /// No description provided for @draftNotSavedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Your latest edits haven\'t been saved yet.'**
+  String get draftNotSavedNotice;
 }
 
 class _AppLocalizationsDelegate

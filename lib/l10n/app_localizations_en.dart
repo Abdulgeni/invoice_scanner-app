@@ -102,4 +102,137 @@ class AppLocalizationsEn extends AppLocalizations {
   String validationInvalidNumber(String example) {
     return 'Enter a valid number, for example $example.';
   }
+
+  @override
+  String get scanInvoiceAction => 'Scan invoice';
+
+  @override
+  String get homeHeroTitle => 'Scan an invoice';
+
+  @override
+  String get homeHeroBody =>
+      'Capture it, check the details, and save it in seconds.';
+
+  @override
+  String get homeTipsTitle => 'Scanning tips';
+
+  @override
+  String get recentInvoicesTitle => 'Recent invoices';
+
+  @override
+  String get recentInvoicesEmpty => 'Invoices you save will appear here.';
+
+  @override
+  String get invoiceUnnamed => 'Unnamed invoice';
+
+  @override
+  String get recentNoTotal => 'No total';
+
+  @override
+  String get recentNoDate => 'No date';
+
+  @override
+  String get guidanceTitle => 'Before you scan';
+
+  @override
+  String get guidanceLighting => 'Use even light and avoid glare or shadows.';
+
+  @override
+  String get guidanceFlat => 'Lay the page flat on a plain, dark surface.';
+
+  @override
+  String get guidanceFrame => 'Keep the whole page in the frame, edge to edge.';
+
+  @override
+  String guidanceMultiPage(int max) {
+    return 'Long invoice? Scan up to $max pages, in order.';
+  }
+
+  @override
+  String get guidanceStart => 'Open camera';
+
+  @override
+  String get previewTitle => 'Check your scan';
+
+  @override
+  String get previewHint => 'Make sure every line is readable. Pinch to zoom.';
+
+  @override
+  String previewPageCounter(int current, int total) {
+    return 'Page $current of $total';
+  }
+
+  @override
+  String previewPageSemantics(int current, int total) {
+    return 'Invoice page $current of $total';
+  }
+
+  @override
+  String get previewImageUnavailable => 'This page couldn\'t be shown.';
+
+  @override
+  String get readInvoiceAction => 'Read invoice';
+
+  @override
+  String get discardAction => 'Discard';
+
+  @override
+  String get discardConfirmTitle => 'Discard this scan?';
+
+  @override
+  String get discardConfirmBody => 'The captured pages will be deleted.';
+
+  @override
+  String get capturingOpening => 'Opening scanner…';
+
+  @override
+  String get captureErrorTitle => 'Couldn\'t scan';
+
+  @override
+  String get captureErrorCameraDenied =>
+      'Camera access is turned off. Turn it on in your device settings to scan invoices.';
+
+  @override
+  String get captureErrorScannerUnavailable =>
+      'The scanner couldn\'t start. Please try again.';
+
+  @override
+  String get captureErrorStorage =>
+      'Your device storage isn\'t available right now. Please try again.';
+
+  @override
+  String get captureErrorUnknown =>
+      'Something went wrong while scanning. Please try again.';
+
+  @override
+  String get doneAction => 'Done';
+
+  @override
+  String get reviewTitle => 'Review details';
+
+  @override
+  String warningsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count warnings',
+      one: '1 warning',
+      zero: 'No warnings',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get savingLabel => 'Saving…';
+
+  @override
+  String get savedTitle => 'Invoice saved';
+
+  @override
+  String get saveFailedNotice =>
+      'Couldn\'t save. Your edits are kept. Try again.';
+
+  @override
+  String get draftNotSavedNotice =>
+      'Your latest edits haven\'t been saved yet.';
 }

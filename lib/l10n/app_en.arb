@@ -63,5 +63,81 @@
         "type": "String"
       }
     }
-  }
+  },
+
+  "scanInvoiceAction": "Scan invoice",
+  "homeHeroTitle": "Scan an invoice",
+  "homeHeroBody": "Capture it, check the details, and save it in seconds.",
+  "homeTipsTitle": "Scanning tips",
+  "recentInvoicesTitle": "Recent invoices",
+  "recentInvoicesEmpty": "Invoices you save will appear here.",
+  "invoiceUnnamed": "Unnamed invoice",
+  "recentNoTotal": "No total",
+  "recentNoDate": "No date",
+
+  "guidanceTitle": "Before you scan",
+  "guidanceLighting": "Use even light and avoid glare or shadows.",
+  "guidanceFlat": "Lay the page flat on a plain, dark surface.",
+  "guidanceFrame": "Keep the whole page in the frame, edge to edge.",
+  "guidanceMultiPage": "Long invoice? Scan up to {max} pages, in order.",
+  "@guidanceMultiPage": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "guidanceStart": "Open camera",
+
+  "previewTitle": "Check your scan",
+  "previewHint": "Make sure every line is readable. Pinch to zoom.",
+  "previewPageCounter": "Page {current} of {total}",
+  "@previewPageCounter": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "previewPageSemantics": "Invoice page {current} of {total}",
+  "@previewPageSemantics": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "previewImageUnavailable": "This page couldn't be shown.",
+  "readInvoiceAction": "Read invoice",
+  "discardAction": "Discard",
+  "discardConfirmTitle": "Discard this scan?",
+  "discardConfirmBody": "The captured pages will be deleted.",
+
+  "capturingOpening": "Opening scanner…",
+  "captureErrorTitle": "Couldn't scan",
+  "captureErrorCameraDenied": "Camera access is turned off. Turn it on in your device settings to scan invoices.",
+  "captureErrorScannerUnavailable": "The scanner couldn't start. Please try again.",
+  "captureErrorStorage": "Your device storage isn't available right now. Please try again.",
+  "captureErrorUnknown": "Something went wrong while scanning. Please try again.",
+  "doneAction": "Done",
+
+  "reviewTitle": "Review details",
+  "warningsCount": "{count, plural, =0{No warnings} =1{1 warning} other{{count} warnings}}",
+  "@warningsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "savingLabel": "Saving…",
+  "savedTitle": "Invoice saved",
+  "saveFailedNotice": "Couldn't save. Your edits are kept. Try again.",
+  "draftNotSavedNotice": "Your latest edits haven't been saved yet."
 }

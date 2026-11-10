@@ -32,6 +32,10 @@ abstract final class AppSizes {
   static const double iconSm = 20;
   static const double iconMd = 24;
   static const double iconLg = 32;
+  static const double iconXl = 56;
+  static const double pageDot = 8;
+  static const double pageDotActive = 24;
+  static const double thumbnail = 120;
   static const double maxContentWidth = 640;
 }
 
@@ -49,7 +53,6 @@ abstract final class AppShadows {
 
 /// Global switch for Pressable haptics. Module 6 wires this to a preference;
 /// for Phase 1 it is a compile-time constant so no settings screen is needed.
-// [M1-ADJUST-3]
 const bool kHapticsEnabled = true;
 
 abstract final class AppMotion {
@@ -63,9 +66,20 @@ abstract final class AppMotion {
 
   static const double pressScale = 0.97;
 
+  /// Lowest scale of the pulsing "working" icon.
+  static const double pulseMinScale = 0.92;
+
   static bool reduced(BuildContext context) =>
       MediaQuery.maybeDisableAnimationsOf(context) ?? false;
 
   static Duration resolve(BuildContext context, Duration duration) =>
       reduced(context) ? Duration.zero : duration;
+}
+
+abstract final class AppZoom {
+  static const double min = 1;
+  static const double max = 4;
+
+  /// Scale above which a page counts as zoomed.
+  static const double epsilon = 0.01;
 }

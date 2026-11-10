@@ -60,8 +60,11 @@ B makeBloc({
       analytics: analytics,
       clock: clock,
     ),
-    deleteInvoice:
-        DeleteInvoice(repository: repo, imageStore: store, clock: clock),
+    deleteInvoice: DeleteInvoice(
+      repository: repo,
+      imageStore: store,
+      clock: clock,
+    ),
     updateReviewDraft: UpdateReviewDraft(repository: repo, clock: clock),
     loadRecord: repo.get,
     clock: clock,
@@ -144,8 +147,9 @@ void main() {
         preprocessing,
         isA<InvoiceImageReady>()
             .having((x) => x.recordId, 'recordId', 'id-1')
-            .having((x) => x.pagePaths, 'paths',
-                <String>['managed/id-1_0.jpg']),
+            .having((x) => x.pagePaths, 'paths', <String>[
+              'managed/id-1_0.jpg',
+            ]),
       ],
       verify: (_) {
         expect(repo.rows['id-1']!.status, InvoiceStatus.pendingExtraction);
@@ -174,8 +178,11 @@ void main() {
       expect: () => <Matcher>[
         capturing(ScanSource.camera),
         isA<InvoiceCaptureFailure>()
-            .having((x) => x.reason, 'reason',
-                CaptureFailureReason.tooManyPages)
+            .having(
+              (x) => x.reason,
+              'reason',
+              CaptureFailureReason.tooManyPages,
+            )
             .having((x) => x.maxPages, 'max', 5),
       ],
       verify: (_) => expect(repo.rows, isEmpty),
@@ -183,23 +190,31 @@ void main() {
 
     for (final (String code, CaptureFailureReason reason)
         in <(String, CaptureFailureReason)>[
-      (DebugCodes.cameraPermissionDenied,
-          CaptureFailureReason.cameraPermissionDenied),
-      (DebugCodes.scannerUnavailable,
-          CaptureFailureReason.scannerUnavailable),
-      ('something_else', CaptureFailureReason.unknown),
-    ]) {
+          (
+            DebugCodes.cameraPermissionDenied,
+            CaptureFailureReason.cameraPermissionDenied,
+          ),
+          (
+            DebugCodes.scannerUnavailable,
+            CaptureFailureReason.scannerUnavailable,
+          ),
+          ('something_else', CaptureFailureReason.unknown),
+        ]) {
       blocTest<B, S>(
         'scanner failure "$code" maps to ${reason.name}',
         build: makeBloc,
-        setUp: () => scanner.error =
-            InvoiceFailure(InvoiceErrorKind.unknown, debugCode: code),
+        setUp: () => scanner.error = InvoiceFailure(
+          InvoiceErrorKind.unknown,
+          debugCode: code,
+        ),
         act: (b) async {
           b.add(const ScanRequested(ScanSource.camera));
           await pump();
         },
-        expect: () =>
-            <Matcher>[capturing(ScanSource.camera), captureFailure(reason)],
+        expect: () => <Matcher>[
+          capturing(ScanSource.camera),
+          captureFailure(reason),
+        ],
       );
     }
 
@@ -294,25 +309,27 @@ void main() {
         capturing(ScanSource.camera),
         preprocessing,
         imageReady('id-1'),
-        isA<InvoiceExtracting>().having((x) => x.pagePaths, 'paths',
-            <String>['managed/id-1_0.jpg']),
+        isA<InvoiceExtracting>().having((x) => x.pagePaths, 'paths', <String>[
+          'managed/id-1_0.jpg',
+        ]),
         reviewing(
-            where: (r) => r.invoice == sampleInvoice() && r.warnings.isEmpty),
+          where: (r) => r.invoice == sampleInvoice() && r.warnings.isEmpty,
+        ),
       ],
     );
 
     for (final (InvoiceErrorKind kind, bool canRetry, bool retake)
         in <(InvoiceErrorKind, bool, bool)>[
-      (InvoiceErrorKind.network, true, false),
-      (InvoiceErrorKind.timeout, true, false),
-      (InvoiceErrorKind.quotaExceeded, true, false),
-      (InvoiceErrorKind.appCheckFailed, false, false),
-      (InvoiceErrorKind.safetyBlock, false, true),
-      (InvoiceErrorKind.emptyResponse, true, true),
-      (InvoiceErrorKind.malformedJson, true, false),
-      (InvoiceErrorKind.notAnInvoice, false, true),
-      (InvoiceErrorKind.unknown, true, false),
-    ]) {
+          (InvoiceErrorKind.network, true, false),
+          (InvoiceErrorKind.timeout, true, false),
+          (InvoiceErrorKind.quotaExceeded, true, false),
+          (InvoiceErrorKind.appCheckFailed, false, false),
+          (InvoiceErrorKind.safetyBlock, false, true),
+          (InvoiceErrorKind.emptyResponse, true, true),
+          (InvoiceErrorKind.malformedJson, true, false),
+          (InvoiceErrorKind.notAnInvoice, false, true),
+          (InvoiceErrorKind.unknown, true, false),
+        ]) {
       blocTest<B, S>(
         'a ${kind.name} failure becomes a typed failure state',
         build: makeBloc,
@@ -370,8 +387,8 @@ void main() {
     blocTest<B, S>(
       'a non-retryable failure ignores "try again"',
       build: makeBloc,
-      setUp: () => extractor.error =
-          const InvoiceFailure(InvoiceErrorKind.notAnInvoice),
+      setUp: () =>
+          extractor.error = const InvoiceFailure(InvoiceErrorKind.notAnInvoice),
       act: (b) async {
         await toReview(b);
         b.add(const ExtractRequested());
@@ -422,8 +439,12 @@ void main() {
         await pump();
       },
       skip: 3,
-      expect: () =>
-          <Matcher>[extracting, imageReady('id-1'), extracting, reviewing()],
+      expect: () => <Matcher>[
+        extracting,
+        imageReady('id-1'),
+        extracting,
+        reviewing(),
+      ],
     );
 
     blocTest<B, S>(
@@ -453,8 +474,10 @@ void main() {
         onSleep = () {
           polls++;
           if (polls == 2) {
-            repo.rows['id-1'] =
-                repo.rows['id-1']!.markNeedsReview(sampleInvoice(), testT0);
+            repo.rows['id-1'] = repo.rows['id-1']!.markNeedsReview(
+              sampleInvoice(),
+              testT0,
+            );
           }
         };
         b.add(const ExtractRequested());
@@ -565,8 +588,8 @@ void main() {
     blocTest<B, S>(
       '"Keep image" leaves the record and returns to the start',
       build: makeBloc,
-      setUp: () => extractor.error =
-          const InvoiceFailure(InvoiceErrorKind.notAnInvoice),
+      setUp: () =>
+          extractor.error = const InvoiceFailure(InvoiceErrorKind.notAnInvoice),
       act: (b) async {
         await toReview(b);
         b.add(const KeepImageRequested());
@@ -588,17 +611,14 @@ void main() {
 
   group('opening an existing record', () {
     InvoiceRecord base(String id) => InvoiceRecord.queued(
-          id: id,
-          imagePaths: <String>['managed/${id}_0.jpg'],
-          now: testT0,
-        );
+      id: id,
+      imagePaths: <String>['managed/${id}_0.jpg'],
+      now: testT0,
+    );
 
-    final Map<String, (InvoiceRecord Function(InvoiceRecord), Matcher)> cases =
-        <String, (InvoiceRecord Function(InvoiceRecord), Matcher)>{
-      'pending shows the preview': (
-        (InvoiceRecord r) => r,
-        imageReady('x'),
-      ),
+    final Map<String, (InvoiceRecord Function(InvoiceRecord), Matcher)>
+    cases = <String, (InvoiceRecord Function(InvoiceRecord), Matcher)>{
+      'pending shows the preview': ((InvoiceRecord r) => r, imageReady('x')),
       'in review shows the review': (
         (InvoiceRecord r) =>
             r.markExtracting(testT0).markNeedsReview(sampleInvoice(), testT0),
@@ -624,8 +644,10 @@ void main() {
         initial,
       ),
     };
-    cases.forEach(
-        (String name, (InvoiceRecord Function(InvoiceRecord), Matcher) c) {
+    cases.forEach((
+      String name,
+      (InvoiceRecord Function(InvoiceRecord), Matcher) c,
+    ) {
       blocTest<B, S>(
         name,
         build: makeBloc,
@@ -696,9 +718,13 @@ void main() {
       ),
       act: (b) async {
         await toReview(b);
-        b.add(InvoiceEdited(
-          (b.state as InvoiceReviewing).invoice.copyWith(total: () => usd(3300)),
-        ));
+        b.add(
+          InvoiceEdited(
+            (b.state as InvoiceReviewing).invoice.copyWith(
+              total: () => usd(3300),
+            ),
+          ),
+        );
         await pump();
       },
       skip: 4,
@@ -709,7 +735,8 @@ void main() {
           ),
         ),
         reviewing(
-            where: (r) => r.invoice.unreadable.isEmpty && r.warnings.isEmpty),
+          where: (r) => r.invoice.unreadable.isEmpty && r.warnings.isEmpty,
+        ),
       ],
     );
 
@@ -747,8 +774,11 @@ void main() {
           extractor.result = sampleInvoice().copyWith(total: () => usd(3400)),
       act: (b) async {
         await toReview(b);
-        b.add(FixApplied(
-            SetMoneyFix(const FieldRef(InvoiceField.total), usd(3300))));
+        b.add(
+          FixApplied(
+            SetMoneyFix(const FieldRef(InvoiceField.total), usd(3300)),
+          ),
+        );
         await pump();
       },
       skip: 4,
@@ -759,7 +789,8 @@ void main() {
           ),
         ),
         reviewing(
-            where: (r) => r.invoice.total == usd(3300) && r.warnings.isEmpty),
+          where: (r) => r.invoice.total == usd(3300) && r.warnings.isEmpty,
+        ),
       ],
     );
 
@@ -778,8 +809,7 @@ void main() {
       expect: () => <Matcher>[
         reviewing(where: (r) => r.invoice.vendorName == 'Edited'),
       ],
-      verify: (_) =>
-          expect(repo.rows['id-1']!.invoice!.vendorName, 'Edited'),
+      verify: (_) => expect(repo.rows['id-1']!.invoice!.vendorName, 'Edited'),
     );
 
     blocTest<B, S>(
@@ -887,8 +917,11 @@ void main() {
         await pump();
       },
       skip: 5,
-      expect: () =>
-          <Matcher>[isA<InvoiceSaving>(), isA<InvoiceSaved>(), initial],
+      expect: () => <Matcher>[
+        isA<InvoiceSaving>(),
+        isA<InvoiceSaved>(),
+        initial,
+      ],
     );
   });
 }
