@@ -96,6 +96,17 @@ final class AppPaused extends InvoiceScannerEvent {
   const AppPaused();
 }
 
+/// The review form changed. The change is a function of the CURRENT invoice,
+/// so rapid edits can never be applied to a stale copy.
+final class InvoiceChanged extends InvoiceScannerEvent {
+  const InvoiceChanged(this.transform);
+
+  final Invoice Function(Invoice current) transform;
+
+  @override
+  List<Object?> get props => <Object?>[transform];
+}
+
 final class _DraftTick extends InvoiceScannerEvent {
   const _DraftTick();
 }

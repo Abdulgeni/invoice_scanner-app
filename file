@@ -1,0 +1,7 @@
+
+  /// The locale's decimal separator.
+  String get decimalSeparator => _decimal;
+
+  /// Rewrites a canonical ASCII number ...
+  String localize(String canonical) => canonical.replaceAll('.', _decimal);
+}

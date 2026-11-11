@@ -45,6 +45,10 @@ abstract final class AppSizes {
   static const double sweepLineWidth = 2;
   static const double stageSegmentHeight = 4;
   static const double failurePreviewHeight = 200;
+  static const double reviewTwoPaneMinWidth = 840;
+  static const double scanPanelHeight = 320;
+  static const double checkBadge = 96;
+  static const double noteIcon = 20;
 }
 
 abstract final class AppElevation {
@@ -75,6 +79,7 @@ abstract final class AppMotion {
 
   static const Duration sweepCycle = Duration(milliseconds: 2200);
   static const Duration completionBeat = Duration(milliseconds: 700);
+  static const Duration checkDraw = Duration(milliseconds: 700);
 
   static bool reduced(BuildContext context) =>
       MediaQuery.maybeDisableAnimationsOf(context) ?? false;

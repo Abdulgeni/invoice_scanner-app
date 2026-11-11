@@ -218,4 +218,12 @@ class LocalizedNumberParser {
 
   static DecimalParseFailed _fail(DecimalParseFailure reason) =>
       DecimalParseFailed(reason);
+
+  /// The locale's decimal separator.
+  String get decimalSeparator => _decimal;
+
+  /// Rewrites a canonical ASCII number ("-1234.50") for editing in this
+  /// locale: only the decimal point changes, and the parser accepts the
+  /// result back.
+  String localize(String canonical) => canonical.replaceAll('.', _decimal);
 }

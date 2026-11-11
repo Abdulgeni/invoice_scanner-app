@@ -125,4 +125,123 @@ void main() {
       expect(same, invoice);
     });
   });
+
+  group('recalcLineTotal', () {
+    DecimalValue d(String s) => DecimalValue.tryParse(s)!;
+    InvoiceLineItem line({
+      String? qty,
+      String? unit,
+      int? total,
+      Currency c = Currency.usd,
+    }) => InvoiceLineItem(
+      id: 'a',
+      quantity: qty == null ? null : d(qty),
+      unitPrice: unit == null ? null : d(unit),
+      lineTotal: total == null ? null : Money.tryFromMinorUnits(total, c),
+    );
+    Money usdm(int m) => Money.tryFromMinorUnits(m, Currency.usd)!;
+
+    test('an in-step total follows the new quantity', () {
+      final InvoiceLineItem before = line(qty: '2', unit: '5.00', total: 1000);
+      final InvoiceLineItem after = before.copyWith(quantity: () => d('3'));
+      expect(
+        recalcLineTotal(before, after, Currency.usd).lineTotal,
+        usdm(1500),
+      );
+    });
+
+    test('an empty total is filled once quantity and price are known', () {
+      final InvoiceLineItem before = line(qty: '2');
+      final InvoiceLineItem after = before.copyWith(unitPrice: () => d('5.00'));
+      expect(
+        recalcLineTotal(before, after, Currency.usd).lineTotal,
+        usdm(1000),
+      );
+    });
+
+    test('a manual total is never overwritten', () {
+      final InvoiceLineItem before = line(qty: '2', unit: '5.00', total: 999);
+      final InvoiceLineItem after = before.copyWith(quantity: () => d('3'));
+      expect(recalcLineTotal(before, after, Currency.usd).lineTotal, usdm(999));
+    });
+
+    test('a total with no quantity or price behind it is left alone', () {
+      final InvoiceLineItem before = line(total: 500);
+      final InvoiceLineItem after = before.copyWith(
+        quantity: () => d('2'),
+        unitPrice: () => d('1'),
+      );
+      expect(recalcLineTotal(before, after, Currency.usd).lineTotal, usdm(500));
+    });
+
+    test('edits to other fields change nothing', () {
+      final InvoiceLineItem before = line(qty: '2', unit: '5.00', total: 999);
+      final InvoiceLineItem after = before.copyWith(description: () => 'x');
+      expect(recalcLineTotal(before, after, Currency.usd), after);
+    });
+
+    test('a cleared quantity leaves the total alone', () {
+      final InvoiceLineItem before = line(qty: '2', unit: '5.00', total: 1000);
+      final InvoiceLineItem after = before.copyWith(quantity: () => null);
+      expect(
+        recalcLineTotal(before, after, Currency.usd).lineTotal,
+        usdm(1000),
+      );
+    });
+
+    test('rounds half away from zero in the invoice currency', () {
+      final InvoiceLineItem before = line();
+      final InvoiceLineItem after = before.copyWith(
+        quantity: () => d('1.5'),
+        unitPrice: () => d('3.33'),
+      );
+      expect(recalcLineTotal(before, after, Currency.usd).lineTotal, usdm(500));
+      final InvoiceLineItem yen = before.copyWith(
+        quantity: () => d('2'),
+        unitPrice: () => d('150.5'),
+      );
+      expect(
+        recalcLineTotal(before, yen, Currency.jpy).lineTotal,
+        Money.tryFromMinorUnits(301, Currency.jpy),
+      );
+    });
+
+    test('an amount too large for the currency is left unset', () {
+      final InvoiceLineItem before = line();
+      final InvoiceLineItem after = before.copyWith(
+        quantity: () => d('999999999999999'),
+        unitPrice: () => d('999999999999999'),
+      );
+      expect(recalcLineTotal(before, after, Currency.usd).lineTotal, isNull);
+    });
+  });
+
+  group('editLine', () {
+    test('edits only the matching line and recalculates it', () {
+      final Invoice invoice = Invoice(
+        currency: Currency.usd,
+        lineItems: <InvoiceLineItem>[
+          InvoiceLineItem(
+            id: 'a',
+            quantity: DecimalValue.fromInt(2),
+            unitPrice: DecimalValue.tryParse('5'),
+            lineTotal: Money.tryFromMinorUnits(1000, Currency.usd),
+          ),
+          const InvoiceLineItem(id: 'b'),
+        ],
+      );
+      final Invoice next = editLine(
+        invoice,
+        'a',
+        (InvoiceLineItem l) =>
+            l.copyWith(quantity: () => DecimalValue.fromInt(4)),
+      );
+      expect(
+        next.lineItems[0].lineTotal,
+        Money.tryFromMinorUnits(2000, Currency.usd),
+      );
+      expect(next.lineItems[1], const InvoiceLineItem(id: 'b'));
+      expect(editLine(invoice, 'zzz', (InvoiceLineItem l) => l), invoice);
+    });
+  });
 }

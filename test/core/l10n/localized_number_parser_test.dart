@@ -129,4 +129,22 @@ void main() {
       expect(LocalizedNumberParser.stripCurrencyPrefix('12.50'), '12.50');
     });
   });
+
+  group('localize', () {
+    test('uses the locale decimal separator', () {
+      expect(en.localize('-1234.50'), '-1234.50');
+      expect(de.localize('-1234.50'), '-1234,50');
+      expect(de.localize('7'), '7');
+    });
+
+    test('the result parses back to the same canonical number', () {
+      for (final LocalizedNumberParser p in <LocalizedNumberParser>[
+        en,
+        de,
+        fr,
+      ]) {
+        expect(ok(p.parse(p.localize('1234.5'))), '1234.5');
+      }
+    });
+  });
 }

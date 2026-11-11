@@ -26,6 +26,8 @@ import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/fl
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/home_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/preview_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/processing_screen.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/review_screen.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/saved_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/scanner_flow_screen.dart';
 
 import '../../../../support/fakes.dart';
@@ -107,6 +109,7 @@ void main() {
         value: bloc,
         child: ScannerFlowScreen(
           watchRecent: () => const Stream<List<InvoiceRecord>>.empty(),
+          newLineId: () => 'new',
         ),
       ),
     );
@@ -139,10 +142,8 @@ void main() {
 
     final Map<InvoiceScannerState, Type> routes = <InvoiceScannerState, Type>{
       const InvoiceCapturing(source: ScanSource.camera): CaptureProgressView,
-      const InvoicePreprocessing(
-        source: ScanSource.camera,
-        pagePaths: pages,
-      ): ProcessingScreen,
+      const InvoicePreprocessing(source: ScanSource.camera, pagePaths: pages):
+          ProcessingScreen,
       const InvoiceCaptureFailure(reason: CaptureFailureReason.unknown):
           CaptureFailureView,
       const InvoiceImageReady(
@@ -168,10 +169,10 @@ void main() {
         pagePaths: pages,
         invoice: sampleInvoice(),
         warnings: const <ValidationWarning>[],
-      ): ReviewingStubView,
+      ): ReviewScreen,
       InvoiceSaving(recordId: 'a', pagePaths: pages, invoice: sampleInvoice()):
           SavingView,
-      const InvoiceSaved(recordId: 'a'): SavedView,
+      const InvoiceSaved(recordId: 'a'): SavedScreen,
       const InvoiceScannerInitial(): HomeScreen,
     };
     for (final MapEntry<InvoiceScannerState, Type> e in routes.entries) {
@@ -288,6 +289,7 @@ void main() {
         value: bloc,
         child: ScannerFlowScreen(
           watchRecent: () => const Stream<List<InvoiceRecord>>.empty(),
+          newLineId: () => 'new',
         ),
       ),
       reduceMotion: true,

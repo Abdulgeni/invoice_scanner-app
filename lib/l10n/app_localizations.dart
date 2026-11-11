@@ -561,6 +561,384 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something went wrong'**
   String get errorTitleUnknown;
+
+  /// No description provided for @reviewSectionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get reviewSectionDetails;
+
+  /// No description provided for @reviewSectionLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Line items'**
+  String get reviewSectionLines;
+
+  /// No description provided for @reviewSectionTotals.
+  ///
+  /// In en, this message translates to:
+  /// **'Totals'**
+  String get reviewSectionTotals;
+
+  /// No description provided for @vendorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Vendor'**
+  String get vendorLabel;
+
+  /// No description provided for @invoiceNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice number'**
+  String get invoiceNumberLabel;
+
+  /// No description provided for @invoiceDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get invoiceDateLabel;
+
+  /// No description provided for @dateNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a date'**
+  String get dateNotSet;
+
+  /// No description provided for @currencyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get currencyLabel;
+
+  /// No description provided for @currencyPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose currency'**
+  String get currencyPickerTitle;
+
+  /// No description provided for @currencyCustomLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Other currency code'**
+  String get currencyCustomLabel;
+
+  /// No description provided for @currencyUseCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Use code'**
+  String get currencyUseCode;
+
+  /// No description provided for @subtotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtotal'**
+  String get subtotalLabel;
+
+  /// No description provided for @taxLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax'**
+  String get taxLabel;
+
+  /// No description provided for @totalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get totalLabel;
+
+  /// No description provided for @lineNumberTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Line {number}'**
+  String lineNumberTitle(int number);
+
+  /// No description provided for @lineDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get lineDescriptionLabel;
+
+  /// No description provided for @lineQuantityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get lineQuantityLabel;
+
+  /// No description provided for @lineUnitPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit price'**
+  String get lineUnitPriceLabel;
+
+  /// No description provided for @lineTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Line total'**
+  String get lineTotalLabel;
+
+  /// No description provided for @addLineAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add line'**
+  String get addLineAction;
+
+  /// No description provided for @removeLineTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove line {number}'**
+  String removeLineTooltip(int number);
+
+  /// No description provided for @lineRemovedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Line {number} removed'**
+  String lineRemovedNotice(int number);
+
+  /// No description provided for @undoAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undoAction;
+
+  /// No description provided for @lineItemsSumLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Items add up to'**
+  String get lineItemsSumLabel;
+
+  /// No description provided for @lineItemsSumUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in every line total to see the sum'**
+  String get lineItemsSumUnknown;
+
+  /// No description provided for @validationTooManyDecimals.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at most {digits} decimal places.'**
+  String validationTooManyDecimals(int digits);
+
+  /// No description provided for @validationWholeNumberOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a whole number.'**
+  String get validationWholeNumberOnly;
+
+  /// No description provided for @validationNumberTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'That number is too large.'**
+  String get validationNumberTooLarge;
+
+  /// No description provided for @saveBlockedInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix the highlighted fields to save.'**
+  String get saveBlockedInvalid;
+
+  /// No description provided for @scanPanelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your scan'**
+  String get scanPanelTitle;
+
+  /// No description provided for @scanPanelHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide scan'**
+  String get scanPanelHide;
+
+  /// No description provided for @scanPanelShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show scan'**
+  String get scanPanelShow;
+
+  /// No description provided for @scanPanelFullScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'View full screen'**
+  String get scanPanelFullScreen;
+
+  /// No description provided for @noteWarningPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get noteWarningPrefix;
+
+  /// No description provided for @noteInfoPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get noteInfoPrefix;
+
+  /// No description provided for @dismissUnreadableAction.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s empty'**
+  String get dismissUnreadableAction;
+
+  /// No description provided for @confirmCurrencyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm {currency}'**
+  String confirmCurrencyAction(String currency);
+
+  /// No description provided for @fixSetSubtotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Set subtotal to {value}'**
+  String fixSetSubtotal(String value);
+
+  /// No description provided for @fixSetTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Set tax to {value}'**
+  String fixSetTax(String value);
+
+  /// No description provided for @fixSetTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Set total to {value}'**
+  String fixSetTotal(String value);
+
+  /// No description provided for @hintDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'A discount could explain this.'**
+  String get hintDiscount;
+
+  /// No description provided for @hintExtraCharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping or fees could explain this.'**
+  String get hintExtraCharge;
+
+  /// No description provided for @warningCurrencyAssumed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t tell the currency, so we used {currency}. Please check it.'**
+  String warningCurrencyAssumed(String currency);
+
+  /// No description provided for @warningCurrencyInconsistent.
+  ///
+  /// In en, this message translates to:
+  /// **'This amount is in a different currency than the invoice.'**
+  String get warningCurrencyInconsistent;
+
+  /// No description provided for @warningUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t read this value exactly. Enter it, or confirm it\'s empty.'**
+  String get warningUnreadable;
+
+  /// No description provided for @warningUnreadableLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Some line items couldn\'t be read exactly. Check them against your scan.'**
+  String get warningUnreadableLines;
+
+  /// No description provided for @warningMissingVendor.
+  ///
+  /// In en, this message translates to:
+  /// **'No vendor found.'**
+  String get warningMissingVendor;
+
+  /// No description provided for @warningMissingDate.
+  ///
+  /// In en, this message translates to:
+  /// **'No date found.'**
+  String get warningMissingDate;
+
+  /// No description provided for @warningMissingTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'No total found.'**
+  String get warningMissingTotal;
+
+  /// No description provided for @warningMissingSubtotal.
+  ///
+  /// In en, this message translates to:
+  /// **'No subtotal found.'**
+  String get warningMissingSubtotal;
+
+  /// No description provided for @warningMissingTax.
+  ///
+  /// In en, this message translates to:
+  /// **'No tax found.'**
+  String get warningMissingTax;
+
+  /// No description provided for @warningMissingLineDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No description.'**
+  String get warningMissingLineDescription;
+
+  /// No description provided for @warningMissingLineTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'No amount for this line.'**
+  String get warningMissingLineTotal;
+
+  /// No description provided for @warningNoLineItems.
+  ///
+  /// In en, this message translates to:
+  /// **'No line items were found.'**
+  String get warningNoLineItems;
+
+  /// No description provided for @warningFutureDate.
+  ///
+  /// In en, this message translates to:
+  /// **'This date is in the future.'**
+  String get warningFutureDate;
+
+  /// No description provided for @warningOldDate.
+  ///
+  /// In en, this message translates to:
+  /// **'This date is quite old.'**
+  String get warningOldDate;
+
+  /// No description provided for @warningZeroTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'The total is zero.'**
+  String get warningZeroTotal;
+
+  /// No description provided for @warningNegativeAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'This amount is negative, which is normal for a credit note.'**
+  String get warningNegativeAmount;
+
+  /// No description provided for @warningLineMathMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity times unit price is {expected}, but this line says {actual}.'**
+  String warningLineMathMismatch(String expected, String actual);
+
+  /// No description provided for @warningLineSumMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The line items add up to {expected}, but this says {actual}. {hint}'**
+  String warningLineSumMismatch(String expected, String actual, String hint);
+
+  /// No description provided for @warningTotalMismatchSum.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtotal plus tax is {expected}, but the total says {actual}. {hint}'**
+  String warningTotalMismatchSum(String expected, String actual, String hint);
+
+  /// No description provided for @savedScanAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan another'**
+  String get savedScanAnother;
+
+  /// No description provided for @savedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{vendor} · {total}'**
+  String savedSummary(String vendor, String total);
 }
 
 class _AppLocalizationsDelegate

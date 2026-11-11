@@ -173,10 +173,13 @@ final class InvoiceSaving extends InvoiceScannerState {
 }
 
 final class InvoiceSaved extends InvoiceScannerState {
-  const InvoiceSaved({required this.recordId});
+  const InvoiceSaved({required this.recordId, this.invoice});
 
   final String recordId;
 
+  /// What was saved, for the success screen. Null when only the id is known.
+  final Invoice? invoice;
+
   @override
-  List<Object?> get props => <Object?>[recordId];
+  List<Object?> get props => <Object?>[recordId, invoice];
 }

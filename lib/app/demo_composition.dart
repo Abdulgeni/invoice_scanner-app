@@ -31,11 +31,13 @@ class AppScope {
   AppScope({
     required this.createBloc,
     required this.watchRecent,
+    required this.newId,
     required this.dispose,
   });
 
   final InvoiceScannerBloc Function() createBloc;
   final Stream<List<InvoiceRecord>> Function() watchRecent;
+  final String Function() newId;
   final Future<void> Function() dispose;
 }
 
@@ -112,6 +114,7 @@ Future<AppScope> createDemoScope() async {
       fallbackCurrency: () => Currency.usd,
     ),
     watchRecent: repository.watchSaved,
+    newId: newId,
     dispose: db.close,
   );
 }

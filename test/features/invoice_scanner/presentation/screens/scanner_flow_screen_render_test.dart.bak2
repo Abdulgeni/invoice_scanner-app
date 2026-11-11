@@ -1,0 +1,301 @@
+// Render-level tests for ScannerFlowScreen.
+//
+// These drive the bloc directly through `emitForTest` and assert the screen
+// that renders for each state. They do NOT exercise tap-to-event binding:
+// that path requires real async and belongs in integration_test/, see
+// integration_test/scanner_flow_screen_test.dart.
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/entities/invoice_record.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/failures/invoice_failure.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/repositories/document_scanner.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/usecases/capture_invoice.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/usecases/delete_invoice.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/usecases/extract_invoice.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/usecases/save_invoice.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/usecases/update_review_draft.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/validation/validation_warning.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/value_objects/currency.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/invoice_scanner_bloc.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/capture_status_views.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/extraction_failure_screen.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/flow_stage_views.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/home_screen.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/preview_screen.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/processing_screen.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/scanner_flow_screen.dart';
+
+import '../../../../support/fakes.dart';
+import '../../../../support/pump_app.dart';
+
+class TestableInvoiceScannerBloc extends InvoiceScannerBloc {
+  TestableInvoiceScannerBloc({
+    required super.captureInvoice,
+    required super.extractInvoice,
+    required super.saveInvoice,
+    required super.deleteInvoice,
+    required super.updateReviewDraft,
+    required super.loadRecord,
+    required super.clock,
+    required super.fallbackCurrency,
+  });
+
+  void emitForTest(InvoiceScannerState state) => emit(state);
+}
+
+const List<String> pages = <String>['managed/a_0.jpg'];
+
+Future<void> advance(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 500));
+  await tester.pump(const Duration(milliseconds: 500));
+}
+
+void main() {
+  late FakeInvoiceRepository repo;
+  late FakeImageStore store;
+  late FakeDocumentScanner scanner;
+  late FakeImagePreprocessor pre;
+  late FakeInvoiceExtractor extractor;
+  late RecordingAnalytics analytics;
+  late TestableInvoiceScannerBloc bloc;
+  late int idCounter;
+
+  TestableInvoiceScannerBloc makeBloc() {
+    final clock = fixedClock(testT0.add(const Duration(seconds: 30)));
+    return TestableInvoiceScannerBloc(
+      captureInvoice: CaptureInvoice(
+        scanner: scanner,
+        preprocessor: pre,
+        repository: repo,
+        imageStore: store,
+        clock: clock,
+        newId: () => 'id-${++idCounter}',
+      ),
+      extractInvoice: ExtractInvoice(
+        repository: repo,
+        extractor: extractor,
+        imageStore: store,
+        analytics: analytics,
+        clock: clock,
+      ),
+      saveInvoice: SaveInvoice(
+        repository: repo,
+        imageStore: store,
+        analytics: analytics,
+        clock: clock,
+      ),
+      deleteInvoice: DeleteInvoice(
+        repository: repo,
+        imageStore: store,
+        clock: clock,
+      ),
+      updateReviewDraft: UpdateReviewDraft(repository: repo, clock: clock),
+      loadRecord: repo.get,
+      clock: clock,
+      fallbackCurrency: () => Currency.usd,
+    );
+  }
+
+  Future<void> pumpFlow(WidgetTester tester) async {
+    await pumpLocalized(
+      tester,
+      BlocProvider<InvoiceScannerBloc>.value(
+        value: bloc,
+        child: ScannerFlowScreen(
+          watchRecent: () => const Stream<List<InvoiceRecord>>.empty(),
+          newLineId: () => 'new',
+        ),
+      ),
+    );
+    await settle(tester);
+  }
+
+  Future<void> emit(WidgetTester tester, InvoiceScannerState state) async {
+    bloc.emitForTest(state);
+    await advance(tester);
+  }
+
+  setUp(() {
+    repo = FakeInvoiceRepository();
+    store = FakeImageStore();
+    scanner = FakeDocumentScanner();
+    pre = FakeImagePreprocessor(store);
+    extractor = FakeInvoiceExtractor();
+    analytics = RecordingAnalytics();
+    idCounter = 0;
+    bloc = makeBloc();
+  });
+
+  tearDown(() async {
+    await bloc.close();
+  });
+
+  testWidgets('every state routes to its screen', (tester) async {
+    await pumpFlow(tester);
+    expect(find.byType(HomeScreen), findsOneWidget);
+
+    final Map<InvoiceScannerState, Type> routes = <InvoiceScannerState, Type>{
+      const InvoiceCapturing(source: ScanSource.camera): CaptureProgressView,
+      const InvoicePreprocessing(
+        source: ScanSource.camera,
+        pagePaths: pages,
+      ): ProcessingScreen,
+      const InvoiceCaptureFailure(reason: CaptureFailureReason.unknown):
+          CaptureFailureView,
+      const InvoiceImageReady(
+        recordId: 'a',
+        pagePaths: pages,
+        source: ScanSource.camera,
+      ): PreviewScreen,
+      const InvoiceExtracting(
+        recordId: 'a',
+        pagePaths: pages,
+        source: ScanSource.camera,
+      ): ProcessingScreen,
+      const InvoiceExtractionFailure(
+        recordId: 'a',
+        pagePaths: pages,
+        source: ScanSource.camera,
+        kind: InvoiceErrorKind.timeout,
+        canRetry: true,
+        suggestsRetake: false,
+      ): ExtractionFailureScreen,
+      InvoiceReviewing(
+        recordId: 'a',
+        pagePaths: pages,
+        invoice: sampleInvoice(),
+        warnings: const <ValidationWarning>[],
+      ): ReviewingStubView,
+      InvoiceSaving(recordId: 'a', pagePaths: pages, invoice: sampleInvoice()):
+          SavingView,
+      const InvoiceSaved(recordId: 'a'): SavedView,
+      const InvoiceScannerInitial(): HomeScreen,
+    };
+    for (final MapEntry<InvoiceScannerState, Type> e in routes.entries) {
+      await emit(tester, e.key);
+      expect(
+        find.byType(e.value),
+        findsOneWidget,
+        reason: e.key.runtimeType.toString(),
+      );
+    }
+  });
+
+  testWidgets('the guidance sheet shows on Scan and closes on barrier tap', (
+    tester,
+  ) async {
+    await pumpFlow(tester);
+    await tester.tap(find.text('Scan invoice'));
+    await tester.pumpAndSettle();
+    expect(find.text('Before you scan'), findsOneWidget);
+
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.text('Before you scan'), findsNothing);
+  });
+
+  testWidgets('the tips button shows guidance without a start button', (
+    tester,
+  ) async {
+    await pumpFlow(tester);
+    await tester.tap(find.byTooltip('Scanning tips'));
+    await tester.pumpAndSettle();
+    expect(find.text('Before you scan'), findsOneWidget);
+    expect(find.text('Open camera'), findsNothing);
+  });
+
+  testWidgets('the page-limit failure names the limit', (tester) async {
+    await pumpFlow(tester);
+    await emit(
+      tester,
+      const InvoiceCaptureFailure(
+        reason: CaptureFailureReason.tooManyPages,
+        maxPages: 5,
+      ),
+    );
+    expect(find.textContaining('up to 5 pages'), findsOneWidget);
+  });
+
+  testWidgets('the discard confirmation asks first', (tester) async {
+    await pumpFlow(tester);
+    await emit(
+      tester,
+      const InvoiceImageReady(
+        recordId: 'a',
+        pagePaths: pages,
+        source: ScanSource.camera,
+      ),
+    );
+
+    await tester.tap(find.byTooltip('Discard'));
+    await tester.pumpAndSettle();
+    expect(find.text('Discard this scan?'), findsOneWidget);
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.byType(PreviewScreen), findsOneWidget);
+  });
+
+  testWidgets('the system back button asks before discarding', (tester) async {
+    await pumpFlow(tester);
+    await emit(
+      tester,
+      const InvoiceImageReady(
+        recordId: 'a',
+        pagePaths: pages,
+        source: ScanSource.camera,
+      ),
+    );
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Discard this scan?'), findsOneWidget);
+  });
+
+  testWidgets('a save-failed notice shows a snackbar once', (tester) async {
+    await pumpFlow(tester);
+    final InvoiceReviewing base = InvoiceReviewing(
+      recordId: 'a',
+      pagePaths: pages,
+      invoice: sampleInvoice(),
+      warnings: const <ValidationWarning>[],
+    );
+    await emit(tester, base);
+    expect(find.byType(SnackBar), findsNothing);
+
+    await emit(tester, base.withNotice(ReviewNotice.saveFailed));
+    expect(find.textContaining("Couldn't save"), findsOneWidget);
+  });
+
+  testWidgets('pausing the app does not crash', (tester) async {
+    await pumpFlow(tester);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pump();
+    expect(find.byType(HomeScreen), findsOneWidget);
+  });
+
+  testWidgets('with reduce-motion the working screens stop animating', (
+    tester,
+  ) async {
+    await pumpLocalized(
+      tester,
+      BlocProvider<InvoiceScannerBloc>.value(
+        value: bloc,
+        child: ScannerFlowScreen(
+          watchRecent: () => const Stream<List<InvoiceRecord>>.empty(),
+          newLineId: () => 'new',
+        ),
+      ),
+      reduceMotion: true,
+    );
+    bloc.emitForTest(const InvoiceCapturing(source: ScanSource.camera));
+    await tester.pumpAndSettle();
+    expect(find.byType(CaptureProgressView), findsOneWidget);
+  });
+}

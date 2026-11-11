@@ -135,34 +135,38 @@ class _FrontCard extends StatelessWidget {
                       fit: BoxFit.contain,
                       cacheWidth: decodeWidth,
                       filterQuality: FilterQuality.medium,
-                      frameBuilder: (
-                        BuildContext context,
-                        Widget child,
-                        int? frame,
-                        bool wasSynchronouslyLoaded,
-                      ) {
-                        if (wasSynchronouslyLoaded) return child;
-                        return AnimatedOpacity(
-                          opacity: frame == null ? 0 : 1,
-                          duration:
-                              AppMotion.resolve(context, AppMotion.base),
-                          curve: AppMotion.standard,
-                          child: child,
-                        );
-                      },
-                      errorBuilder: (
-                        BuildContext context,
-                        Object error,
-                        StackTrace? stack,
-                      ) {
-                        return Center(
-                          child: Icon(
-                            Icons.broken_image_outlined,
-                            size: AppSizes.iconLg,
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        );
-                      },
+                      frameBuilder:
+                          (
+                            BuildContext context,
+                            Widget child,
+                            int? frame,
+                            bool wasSynchronouslyLoaded,
+                          ) {
+                            if (wasSynchronouslyLoaded) return child;
+                            return AnimatedOpacity(
+                              opacity: frame == null ? 0 : 1,
+                              duration: AppMotion.resolve(
+                                context,
+                                AppMotion.base,
+                              ),
+                              curve: AppMotion.standard,
+                              child: child,
+                            );
+                          },
+                      errorBuilder:
+                          (
+                            BuildContext context,
+                            Object error,
+                            StackTrace? stack,
+                          ) {
+                            return Center(
+                              child: Icon(
+                                Icons.broken_image_outlined,
+                                size: AppSizes.iconLg,
+                                color: scheme.onSurfaceVariant,
+                              ),
+                            );
+                          },
                     );
                   },
                 ),
@@ -200,10 +204,9 @@ class _CountPill extends StatelessWidget {
           ),
           child: Text(
             text,
-            style: Theme.of(context)
-                .textTheme
-                .labelLarge
-                ?.copyWith(color: scheme.onInverseSurface),
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(color: scheme.onInverseSurface),
           ),
         ),
       ),

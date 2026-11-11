@@ -1,5 +1,7 @@
 import 'package:invoice_scanner/features/invoice_scanner/domain/entities/invoice.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/validation/validation_warning.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/value_objects/currency.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/value_objects/decimal_value.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/value_objects/money.dart';
 
 /// Drops "unreadable" flags that no longer apply. A flag means "the model
@@ -64,4 +66,55 @@ bool _isResolved(Invoice invoice, FieldRef ref) {
     InvoiceField.lineTotal => line?.lineTotal != null,
     InvoiceField.currency || InvoiceField.lineItems => false,
   };
+}
+
+/// Applies [edit] to the line with [lineId] and keeps its total in step.
+/// Other lines are untouched; an unknown id changes nothing.
+Invoice editLine(
+  Invoice invoice,
+  String lineId,
+  InvoiceLineItem Function(InvoiceLineItem line) edit,
+) {
+  return invoice.copyWith(
+    lineItems: <InvoiceLineItem>[
+      for (final InvoiceLineItem item in invoice.lineItems)
+        item.id == lineId
+            ? recalcLineTotal(item, edit(item), invoice.currency)
+            : item,
+    ],
+  );
+}
+
+/// After a quantity or unit-price edit, keeps the line total in step when it
+/// was in step before: empty, or exactly quantity x unit price rounded to the
+/// currency (half away from zero). Any other total, including one the user
+/// typed, is left alone so a manual total is never silently overwritten.
+InvoiceLineItem recalcLineTotal(
+  InvoiceLineItem before,
+  InvoiceLineItem after,
+  Currency currency,
+) {
+  if (before.quantity == after.quantity &&
+      before.unitPrice == after.unitPrice) {
+    return after;
+  }
+  final DecimalValue? quantity = after.quantity;
+  final DecimalValue? unitPrice = after.unitPrice;
+  if (quantity == null || unitPrice == null) return after;
+  if (!_wasInStep(before, currency)) return after;
+  final Money? expected = Money.tryFromDecimalRounded(
+    quantity * unitPrice,
+    currency,
+  );
+  if (expected == null) return after;
+  return after.copyWith(lineTotal: () => expected);
+}
+
+bool _wasInStep(InvoiceLineItem line, Currency currency) {
+  final Money? total = line.lineTotal;
+  if (total == null) return true;
+  final DecimalValue? quantity = line.quantity;
+  final DecimalValue? unitPrice = line.unitPrice;
+  if (quantity == null || unitPrice == null) return false;
+  return Money.tryFromDecimalRounded(quantity * unitPrice, currency) == total;
 }

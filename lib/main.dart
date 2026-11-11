@@ -30,7 +30,10 @@ class InvoiceScannerApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       home: BlocProvider<InvoiceScannerBloc>(
         create: (BuildContext context) => scope.createBloc(),
-        child: ScannerFlowScreen(watchRecent: scope.watchRecent),
+        child: ScannerFlowScreen(
+          watchRecent: scope.watchRecent,
+          newLineId: scope.newId,
+        ),
       ),
     );
   }

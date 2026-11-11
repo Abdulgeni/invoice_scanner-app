@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:invoice_scanner/core/theme/app_tokens.dart';
+import 'package:invoice_scanner/core/util/clock.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/entities/invoice.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/entities/invoice_record.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/repositories/document_scanner.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/invoice_scanner_bloc.dart';
@@ -13,6 +15,8 @@ import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/fl
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/home_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/preview_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/processing_screen.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/review_screen.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/saved_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/widgets/scan_guidance_sheet.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/widgets/stage_progress.dart';
 import 'package:invoice_scanner/l10n/app_localizations.dart';
@@ -21,9 +25,16 @@ import 'package:invoice_scanner/l10n/app_localizations.dart';
 /// behavior: scan guidance, discard confirmation, the system back button,
 /// notices, the "checking totals" completion beat, and lifecycle forwarding.
 class ScannerFlowScreen extends StatefulWidget {
-  const ScannerFlowScreen({required this.watchRecent, super.key});
+  const ScannerFlowScreen({
+    required this.watchRecent,
+    required this.newLineId,
+    super.key,
+  });
 
   final Stream<List<InvoiceRecord>> Function() watchRecent;
+
+  /// Creates ids for lines the user adds in the review.
+  final IdGenerator newLineId;
 
   @override
   State<ScannerFlowScreen> createState() => _ScannerFlowScreenState();
@@ -70,6 +81,11 @@ class _ScannerFlowScreenState extends State<ScannerFlowScreen>
       _guidance.markShown();
     }
     _start(ScanSource.camera);
+  }
+
+  void _scanAnother() {
+    _bloc.add(const ResetRequested());
+    unawaited(_scan());
   }
 
   void _start(ScanSource source) {
@@ -221,14 +237,18 @@ class _ScannerFlowScreenState extends State<ScannerFlowScreen>
         onKeep: () => _bloc.add(const KeepImageRequested()),
         onDiscard: _confirmDiscard,
       ),
-      final InvoiceReviewing review => ReviewingStubView(
+      final InvoiceReviewing review => ReviewScreen(
         state: review,
+        newLineId: widget.newLineId,
+        onChange: (Invoice Function(Invoice) t) => _bloc.add(InvoiceChanged(t)),
         onSave: () => _bloc.add(const SaveRequested()),
         onDiscard: _confirmDiscard,
       ),
       InvoiceSaving() => const SavingView(),
-      InvoiceSaved() => SavedView(
+      InvoiceSaved(:final Invoice? invoice) => SavedScreen(
+        invoice: invoice,
         onDone: () => _bloc.add(const ResetRequested()),
+        onScanAnother: _scanAnother,
       ),
     };
   }

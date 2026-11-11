@@ -77,6 +77,7 @@ class InvoiceScannerBloc
     on<FixApplied>(_onFixApplied);
     on<UnreadableDismissed>(_onUnreadableDismissed);
     on<SaveRequested>(_onSaveRequested);
+    on<InvoiceChanged>(_onInvoiceChanged);
     on<AppPaused>(_onAppPaused);
     on<_DraftTick>(_onDraftTick);
   }
@@ -515,6 +516,14 @@ class InvoiceScannerBloc
     }
   }
 
+  void _onInvoiceChanged(
+    InvoiceChanged event,
+    Emitter<InvoiceScannerState> emit,
+  ) {
+    final InvoiceScannerState s = state;
+    if (s is InvoiceReviewing) _applyEdit(s, event.transform(s.invoice), emit);
+  }
+
   Future<void> _onSaveRequested(
     SaveRequested event,
     Emitter<InvoiceScannerState> emit,
@@ -540,7 +549,7 @@ class InvoiceScannerBloc
 
     switch (outcome) {
       case SaveSucceeded():
-        emit(InvoiceSaved(recordId: s.recordId));
+        emit(InvoiceSaved(recordId: s.recordId, invoice: s.invoice));
       case SaveBlocked():
         emit(s.withNotice(ReviewNotice.saveFailed));
     }
@@ -612,7 +621,7 @@ class InvoiceScannerBloc
           source: source,
         );
       case InvoiceStatus.saved:
-        return InvoiceSaved(recordId: record.id);
+        return InvoiceSaved(recordId: record.id, invoice: record.invoice);
     }
   }
 

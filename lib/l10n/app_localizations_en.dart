@@ -291,4 +291,223 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorTitleUnknown => 'Something went wrong';
+
+  @override
+  String get reviewSectionDetails => 'Details';
+
+  @override
+  String get reviewSectionLines => 'Line items';
+
+  @override
+  String get reviewSectionTotals => 'Totals';
+
+  @override
+  String get vendorLabel => 'Vendor';
+
+  @override
+  String get invoiceNumberLabel => 'Invoice number';
+
+  @override
+  String get invoiceDateLabel => 'Date';
+
+  @override
+  String get dateNotSet => 'Select a date';
+
+  @override
+  String get currencyLabel => 'Currency';
+
+  @override
+  String get currencyPickerTitle => 'Choose currency';
+
+  @override
+  String get currencyCustomLabel => 'Other currency code';
+
+  @override
+  String get currencyUseCode => 'Use code';
+
+  @override
+  String get subtotalLabel => 'Subtotal';
+
+  @override
+  String get taxLabel => 'Tax';
+
+  @override
+  String get totalLabel => 'Total';
+
+  @override
+  String lineNumberTitle(int number) {
+    return 'Line $number';
+  }
+
+  @override
+  String get lineDescriptionLabel => 'Description';
+
+  @override
+  String get lineQuantityLabel => 'Quantity';
+
+  @override
+  String get lineUnitPriceLabel => 'Unit price';
+
+  @override
+  String get lineTotalLabel => 'Line total';
+
+  @override
+  String get addLineAction => 'Add line';
+
+  @override
+  String removeLineTooltip(int number) {
+    return 'Remove line $number';
+  }
+
+  @override
+  String lineRemovedNotice(int number) {
+    return 'Line $number removed';
+  }
+
+  @override
+  String get undoAction => 'Undo';
+
+  @override
+  String get lineItemsSumLabel => 'Items add up to';
+
+  @override
+  String get lineItemsSumUnknown => 'Fill in every line total to see the sum';
+
+  @override
+  String validationTooManyDecimals(int digits) {
+    return 'Use at most $digits decimal places.';
+  }
+
+  @override
+  String get validationWholeNumberOnly => 'Use a whole number.';
+
+  @override
+  String get validationNumberTooLarge => 'That number is too large.';
+
+  @override
+  String get saveBlockedInvalid => 'Fix the highlighted fields to save.';
+
+  @override
+  String get scanPanelTitle => 'Your scan';
+
+  @override
+  String get scanPanelHide => 'Hide scan';
+
+  @override
+  String get scanPanelShow => 'Show scan';
+
+  @override
+  String get scanPanelFullScreen => 'View full screen';
+
+  @override
+  String get noteWarningPrefix => 'Warning';
+
+  @override
+  String get noteInfoPrefix => 'Note';
+
+  @override
+  String get dismissUnreadableAction => 'It\'s empty';
+
+  @override
+  String confirmCurrencyAction(String currency) {
+    return 'Confirm $currency';
+  }
+
+  @override
+  String fixSetSubtotal(String value) {
+    return 'Set subtotal to $value';
+  }
+
+  @override
+  String fixSetTax(String value) {
+    return 'Set tax to $value';
+  }
+
+  @override
+  String fixSetTotal(String value) {
+    return 'Set total to $value';
+  }
+
+  @override
+  String get hintDiscount => 'A discount could explain this.';
+
+  @override
+  String get hintExtraCharge => 'Shipping or fees could explain this.';
+
+  @override
+  String warningCurrencyAssumed(String currency) {
+    return 'We couldn\'t tell the currency, so we used $currency. Please check it.';
+  }
+
+  @override
+  String get warningCurrencyInconsistent =>
+      'This amount is in a different currency than the invoice.';
+
+  @override
+  String get warningUnreadable =>
+      'We couldn\'t read this value exactly. Enter it, or confirm it\'s empty.';
+
+  @override
+  String get warningUnreadableLines =>
+      'Some line items couldn\'t be read exactly. Check them against your scan.';
+
+  @override
+  String get warningMissingVendor => 'No vendor found.';
+
+  @override
+  String get warningMissingDate => 'No date found.';
+
+  @override
+  String get warningMissingTotal => 'No total found.';
+
+  @override
+  String get warningMissingSubtotal => 'No subtotal found.';
+
+  @override
+  String get warningMissingTax => 'No tax found.';
+
+  @override
+  String get warningMissingLineDescription => 'No description.';
+
+  @override
+  String get warningMissingLineTotal => 'No amount for this line.';
+
+  @override
+  String get warningNoLineItems => 'No line items were found.';
+
+  @override
+  String get warningFutureDate => 'This date is in the future.';
+
+  @override
+  String get warningOldDate => 'This date is quite old.';
+
+  @override
+  String get warningZeroTotal => 'The total is zero.';
+
+  @override
+  String get warningNegativeAmount =>
+      'This amount is negative, which is normal for a credit note.';
+
+  @override
+  String warningLineMathMismatch(String expected, String actual) {
+    return 'Quantity times unit price is $expected, but this line says $actual.';
+  }
+
+  @override
+  String warningLineSumMismatch(String expected, String actual, String hint) {
+    return 'The line items add up to $expected, but this says $actual. $hint';
+  }
+
+  @override
+  String warningTotalMismatchSum(String expected, String actual, String hint) {
+    return 'Subtotal plus tax is $expected, but the total says $actual. $hint';
+  }
+
+  @override
+  String get savedScanAnother => 'Scan another';
+
+  @override
+  String savedSummary(String vendor, String total) {
+    return '$vendor · $total';
+  }
 }
