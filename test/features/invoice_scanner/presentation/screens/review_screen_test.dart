@@ -56,9 +56,10 @@ Future<ReviewHarnessState> pumpReview(
   Invoice invoice, {
   bool reduceMotion = false,
   double textScale = 1,
+  Size? size,
 }) async {
   tester.view.devicePixelRatio = 1;
-  tester.view.physicalSize = const Size(800, 1600);
+  tester.view.physicalSize = size ?? const Size(800, 1600);
   addTearDown(tester.view.reset);
   await pumpLocalized(
     tester,
@@ -200,7 +201,7 @@ void main() {
     testWidgets('a field the user deletes while invalid does not block save', (
       tester,
     ) async {
-      await pumpReview(tester, sampleInvoice());
+      await pumpReview(tester, sampleInvoice(), size: const Size(1200, 800));
       await type(tester, field('Quantity', at: 1), '1,2');
       await tester.pump();
       expect(find.text('Fix the highlighted fields to save.'), findsOneWidget);
@@ -315,7 +316,7 @@ void main() {
     testWidgets('the sum shows a hint while a line total is missing', (
       tester,
     ) async {
-      await pumpReview(tester, sampleInvoice());
+      await pumpReview(tester, sampleInvoice(), size: const Size(1200, 800));
       await tapText(tester, 'Add line');
       expect(
         find.text('Fill in every line total to see the sum'),
@@ -339,7 +340,7 @@ void main() {
     testWidgets('switching currency back and forth reformats the numbers', (
       tester,
     ) async {
-      await pumpReview(tester, sampleInvoice());
+      await pumpReview(tester, sampleInvoice(), size: const Size(1200, 800));
       await tester.tap(find.widgetWithText(InkWell, 'Currency'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('JPY'));
@@ -359,7 +360,7 @@ void main() {
     testWidgets('after switching to yen, decimals are rejected', (
       tester,
     ) async {
-      await pumpReview(tester, sampleInvoice());
+      await pumpReview(tester, sampleInvoice(), size: const Size(1200, 800));
       await tester.tap(find.widgetWithText(InkWell, 'Currency'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('JPY'));
@@ -393,7 +394,7 @@ void main() {
     });
 
     testWidgets('picking a far-future date raises a note', (tester) async {
-      await pumpReview(tester, sampleInvoice());
+      await pumpReview(tester, sampleInvoice(), size: const Size(1200, 800));
       await tester.tap(find.widgetWithText(InkWell, 'Date'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('25'));
@@ -417,7 +418,7 @@ void main() {
     testWidgets('the bar shows the live total and warning count', (
       tester,
     ) async {
-      await pumpReview(tester, sampleInvoice());
+      await pumpReview(tester, sampleInvoice(), size: const Size(1200, 800));
       expect(find.textContaining('33.00'), findsWidgets);
       await type(tester, field('Total'), '34.00');
       expect(find.textContaining('34.00'), findsWidgets);
@@ -433,7 +434,7 @@ void main() {
 
   group('the scan', () {
     testWidgets('collapses and expands on a phone', (tester) async {
-      await pumpReview(tester, sampleInvoice());
+      await pumpReview(tester, sampleInvoice(), size: const Size(1200, 800));
       expect(find.byType(ZoomablePages), findsOneWidget);
       await tester.tap(find.byTooltip('Hide scan'));
       await tester.pumpAndSettle();
@@ -444,17 +445,17 @@ void main() {
     });
 
     testWidgets('sits beside the form on a wide screen', (tester) async {
-      tester.view.devicePixelRatio = 1;
-      tester.view.physicalSize = const Size(1200, 800);
-      addTearDown(tester.view.reset);
-      await pumpReview(tester, sampleInvoice());
+      // size passed via pumpReview
+
+
+      await pumpReview(tester, sampleInvoice(), size: const Size(1200, 800));
       expect(find.byTooltip('Hide scan'), findsNothing);
       expect(find.byType(ZoomablePages), findsOneWidget);
       expect(find.text('Details'), findsOneWidget);
     });
 
     testWidgets('opens full screen', (tester) async {
-      await pumpReview(tester, sampleInvoice());
+      await pumpReview(tester, sampleInvoice(), size: const Size(1200, 800));
       await tester.tap(find.byTooltip('View full screen'));
       await tester.pumpAndSettle();
       expect(find.byType(ScanViewerScreen), findsOneWidget);
@@ -479,10 +480,10 @@ void main() {
     testWidgets('stays usable at 320 wide with double text size', (
       tester,
     ) async {
-      tester.view.devicePixelRatio = 1;
-      tester.view.physicalSize = const Size(320, 568);
-      addTearDown(tester.view.reset);
-      await pumpReview(tester, sampleInvoice(), textScale: 2);
+      // size passed via pumpReview
+
+
+      await pumpReview(tester, sampleInvoice(), textScale: 2, size: const Size(320, 568));
       expect(tester.takeException(), isNull);
       await tester.scrollUntilVisible(
         find.text('Add line'),
