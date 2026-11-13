@@ -57,8 +57,8 @@ Future<void> pumpHistory(
   );
   if (records != null) controller.add(records);
   await tester.pump();
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 50));
+  await tester.pumpAndSettle();
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -115,7 +115,9 @@ void main() {
     );
     controller.addError(Exception('db'));
     await tester.pump();
-    await tester.pump();
+    await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
     expect(find.text("We couldn't load your invoices."), findsOneWidget);
     await tester.tap(find.text('Try again'));
     await tester.pump();
