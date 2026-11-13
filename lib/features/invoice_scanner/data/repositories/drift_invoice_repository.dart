@@ -101,6 +101,17 @@ class DriftInvoiceRepository implements InvoiceRepository {
     return query.watch().map(_decodeAll);
   }
 
+  @override
+  Stream<List<InvoiceRecord>> watchLive() {
+    final query = _db.select(_db.invoiceRows)
+      ..where((t) => t.deletedAt.isNull())
+      ..orderBy(<OrderingTerm Function($InvoiceRowsTable)>[
+        (t) => OrderingTerm.desc(t.updatedAt),
+        (t) => OrderingTerm.asc(t.id),
+      ]);
+    return query.watch().map(_decodeAll);
+  }
+
   Future<InvoiceRow?> _selectOne(String id) {
     return (_db.select(
       _db.invoiceRows,

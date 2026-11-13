@@ -121,6 +121,24 @@ class FakeInvoiceRepository implements InvoiceRepository {
     return saved;
   }
 
+  List<InvoiceRecord> _live() {
+    final List<InvoiceRecord> live =
+        rows.values.where((InvoiceRecord r) => !r.isDeleted).toList();
+    live.sort((InvoiceRecord a, InvoiceRecord b) {
+      final int byTime = b.updatedAt.compareTo(a.updatedAt);
+      return byTime != 0 ? byTime : a.id.compareTo(b.id);
+    });
+    return live;
+  }
+
+  @override
+  Stream<List<InvoiceRecord>> watchLive() async* {
+    yield _live();
+    await for (final _ in _changes.stream) {
+      yield _live();
+    }
+  }
+
   @override
   Stream<List<InvoiceRecord>> watchSaved() async* {
     yield _saved();

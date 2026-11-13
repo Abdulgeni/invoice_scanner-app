@@ -510,4 +510,101 @@ class AppLocalizationsEn extends AppLocalizations {
   String savedSummary(String vendor, String total) {
     return '$vendor · $total';
   }
+
+  @override
+  String get historyTitle => 'Invoices';
+
+  @override
+  String get historyViewAll => 'View all';
+
+  @override
+  String get historyAttentionTitle => 'In progress';
+
+  @override
+  String get historySavedTitle => 'Saved';
+
+  @override
+  String get historyEmptyTitle => 'No invoices yet';
+
+  @override
+  String get historyEmptyBody =>
+      'Scan an invoice from the home screen and it will show up here.';
+
+  @override
+  String get historyLoadFailed => 'We couldn\'t load your invoices.';
+
+  @override
+  String get historyUnreadInvoice => 'Invoice scan';
+
+  @override
+  String get historyContinueHint => 'Tap to continue';
+
+  @override
+  String get statusNotRead => 'Not read yet';
+
+  @override
+  String get statusReading => 'Reading…';
+
+  @override
+  String get statusNeedsReview => 'Needs review';
+
+  @override
+  String get statusSaved => 'Saved';
+
+  @override
+  String deleteInvoiceTooltip(String name) {
+    return 'Delete $name';
+  }
+
+  @override
+  String get deleteInvoiceTitle => 'Delete this invoice?';
+
+  @override
+  String get deleteInvoiceBody =>
+      'This permanently removes the invoice and its images from this device. It can\'t be undone.';
+
+  @override
+  String get deleteAction => 'Delete';
+
+  @override
+  String get deleteFailedNotice => 'Couldn\'t delete. Please try again.';
+
+  @override
+  String get invoiceDeletedNotice => 'Invoice deleted';
+
+  @override
+  String get privacyTooltip => 'Data and privacy';
+
+  @override
+  String get privacyTitle => 'Your data';
+
+  @override
+  String get privacyOnDevice =>
+      'Saved invoices stay on this device. Nothing is synced to an account.';
+
+  @override
+  String get privacyScanImages =>
+      'To read an invoice, its page images are sent over an encrypted connection to an AI service. This app doesn\'t keep them after you save or discard the scan.';
+
+  @override
+  String get privacyRetention =>
+      'Page images are deleted as soon as you save or discard a scan. Scans you haven\'t finished stay here until you do.';
+
+  @override
+  String get privacyDelete =>
+      'Deleting an invoice erases its data and images from this device right away.';
+
+  @override
+  String get detailTitle => 'Invoice';
+
+  @override
+  String detailQuantityTimesPrice(String quantity, String price) {
+    return '$quantity × $price';
+  }
+
+  @override
+  String get detailNoLines => 'No line items were saved.';
+
+  @override
+  String get detailNothingToShow => 'This invoice has no details to show.';
 }

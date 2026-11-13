@@ -19,6 +19,7 @@ import 'package:invoice_scanner/features/invoice_scanner/domain/usecases/save_in
 import 'package:invoice_scanner/features/invoice_scanner/domain/usecases/update_review_draft.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/validation/validation_warning.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/value_objects/currency.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/history_cubit.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/invoice_scanner_bloc.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/capture_status_views.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/extraction_failure_screen.dart';
@@ -110,6 +111,10 @@ void main() {
         child: ScannerFlowScreen(
           watchRecent: () => const Stream<List<InvoiceRecord>>.empty(),
           newLineId: () => 'new',
+          history: HistoryDependencies(
+            watchLive: () => const Stream<List<InvoiceRecord>>.empty(),
+            delete: (String _) async => DeleteOutcome.deleted,
+          ),
         ),
       ),
     );
@@ -290,6 +295,10 @@ void main() {
         child: ScannerFlowScreen(
           watchRecent: () => const Stream<List<InvoiceRecord>>.empty(),
           newLineId: () => 'new',
+          history: HistoryDependencies(
+            watchLive: () => const Stream<List<InvoiceRecord>>.empty(),
+            delete: (String _) async => DeleteOutcome.deleted,
+          ),
         ),
       ),
       reduceMotion: true,

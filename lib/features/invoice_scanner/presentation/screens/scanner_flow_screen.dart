@@ -8,11 +8,14 @@ import 'package:invoice_scanner/core/util/clock.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/entities/invoice.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/entities/invoice_record.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/repositories/document_scanner.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/history_cubit.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/invoice_scanner_bloc.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/capture_status_views.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/extraction_failure_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/flow_stage_views.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/history_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/home_screen.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/invoice_detail_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/preview_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/processing_screen.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/review_screen.dart';
@@ -28,6 +31,7 @@ class ScannerFlowScreen extends StatefulWidget {
   const ScannerFlowScreen({
     required this.watchRecent,
     required this.newLineId,
+    required this.history,
     super.key,
   });
 
@@ -35,6 +39,8 @@ class ScannerFlowScreen extends StatefulWidget {
 
   /// Creates ids for lines the user adds in the review.
   final IdGenerator newLineId;
+
+  final HistoryDependencies history;
 
   @override
   State<ScannerFlowScreen> createState() => _ScannerFlowScreenState();
@@ -115,6 +121,40 @@ class _ScannerFlowScreenState extends State<ScannerFlowScreen>
     if (confirmed == true && mounted) _bloc.add(const DiscardRequested());
   }
 
+  void _openHistory() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => BlocProvider<HistoryCubit>(
+          create: (BuildContext context) => HistoryCubit(
+            watchLive: widget.history.watchLive,
+            deleteInvoice: widget.history.delete,
+          ),
+          child: HistoryScreen(
+            onResume: _resumeRecord,
+            onOpenSaved: _openDetail,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openDetail(InvoiceRecord record) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => InvoiceDetailScreen(
+          record: record,
+          onDelete: () => widget.history.delete(record.id),
+        ),
+      ),
+    );
+  }
+
+  /// Continues an unfinished invoice where it left off.
+  void _resumeRecord(InvoiceRecord record) {
+    _bloc.add(RecordOpened(record.id));
+    Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
+  }
+
   /// The system back button.
   void _onBack(InvoiceScannerState state) {
     switch (state) {
@@ -185,38 +225,40 @@ class _ScannerFlowScreenState extends State<ScannerFlowScreen>
   /// same key (no transition replay), and optimizing and reading share the
   /// processing screen so the sweep continues while only the stage changes.
   String _stageOf(InvoiceScannerState state) => switch (state) {
-    InvoiceScannerInitial() => 'home',
-    InvoiceCapturing() => 'capturing',
-    InvoicePreprocessing() || InvoiceExtracting() => 'processing',
-    InvoiceCaptureFailure() => 'captureFailure',
-    InvoiceImageReady() => 'preview',
-    InvoiceExtractionFailure() => 'failure',
-    InvoiceReviewing() => 'review',
-    InvoiceSaving() => 'saving',
-    InvoiceSaved() => 'saved',
-  };
+        InvoiceScannerInitial() => 'home',
+        InvoiceCapturing() => 'capturing',
+        InvoicePreprocessing() || InvoiceExtracting() => 'processing',
+        InvoiceCaptureFailure() => 'captureFailure',
+        InvoiceImageReady() => 'preview',
+        InvoiceExtractionFailure() => 'failure',
+        InvoiceReviewing() => 'review',
+        InvoiceSaving() => 'saving',
+        InvoiceSaved() => 'saved',
+      };
 
   Widget _viewFor(BuildContext context, InvoiceScannerState state) {
     return switch (state) {
       InvoiceScannerInitial() => HomeScreen(
-        watchRecent: widget.watchRecent,
-        onScan: _scan,
-        onImport: () => _start(ScanSource.gallery),
-        onShowTips: () => showScanGuidanceSheet(context, showStart: false),
-      ),
+          watchRecent: widget.watchRecent,
+          onScan: _scan,
+          onImport: () => _start(ScanSource.gallery),
+          onShowTips: () => showScanGuidanceSheet(context, showStart: false),
+          onViewAll: _openHistory,
+          onOpenInvoice: _openDetail,
+        ),
       InvoiceCapturing() => CaptureProgressView(
-        onCancel: () => _bloc.add(const CancelRequested()),
-      ),
+          onCancel: () => _bloc.add(const CancelRequested()),
+        ),
       InvoicePreprocessing(:final pagePaths) => ProcessingScreen(
-        stage: ProcessingStage.optimizing,
-        pagePaths: pagePaths,
-        onCancel: () => _bloc.add(const CancelRequested()),
-      ),
+          stage: ProcessingStage.optimizing,
+          pagePaths: pagePaths,
+          onCancel: () => _bloc.add(const CancelRequested()),
+        ),
       InvoiceExtracting(:final pagePaths) => ProcessingScreen(
-        stage: ProcessingStage.reading,
-        pagePaths: pagePaths,
-        onCancel: () => _bloc.add(const CancelRequested()),
-      ),
+          stage: ProcessingStage.reading,
+          pagePaths: pagePaths,
+          onCancel: () => _bloc.add(const CancelRequested()),
+        ),
       InvoiceCaptureFailure(:final reason, :final maxPages) =>
         CaptureFailureView(
           reason: reason,
@@ -225,31 +267,32 @@ class _ScannerFlowScreenState extends State<ScannerFlowScreen>
           onDone: () => _bloc.add(const ResetRequested()),
         ),
       InvoiceImageReady(:final pagePaths) => PreviewScreen(
-        pagePaths: pagePaths,
-        onRead: () => _bloc.add(const ExtractRequested()),
-        onRetake: () => _bloc.add(const RetakeRequested()),
-        onDiscard: _confirmDiscard,
-      ),
+          pagePaths: pagePaths,
+          onRead: () => _bloc.add(const ExtractRequested()),
+          onRetake: () => _bloc.add(const RetakeRequested()),
+          onDiscard: _confirmDiscard,
+        ),
       final InvoiceExtractionFailure failure => ExtractionFailureScreen(
-        state: failure,
-        onRetry: () => _bloc.add(const ExtractRequested()),
-        onRetake: () => _bloc.add(const RetakeRequested()),
-        onKeep: () => _bloc.add(const KeepImageRequested()),
-        onDiscard: _confirmDiscard,
-      ),
+          state: failure,
+          onRetry: () => _bloc.add(const ExtractRequested()),
+          onRetake: () => _bloc.add(const RetakeRequested()),
+          onKeep: () => _bloc.add(const KeepImageRequested()),
+          onDiscard: _confirmDiscard,
+        ),
       final InvoiceReviewing review => ReviewScreen(
-        state: review,
-        newLineId: widget.newLineId,
-        onChange: (Invoice Function(Invoice) t) => _bloc.add(InvoiceChanged(t)),
-        onSave: () => _bloc.add(const SaveRequested()),
-        onDiscard: _confirmDiscard,
-      ),
+          state: review,
+          newLineId: widget.newLineId,
+          onChange: (Invoice Function(Invoice) t) =>
+              _bloc.add(InvoiceChanged(t)),
+          onSave: () => _bloc.add(const SaveRequested()),
+          onDiscard: _confirmDiscard,
+        ),
       InvoiceSaving() => const SavingView(),
       InvoiceSaved(:final Invoice? invoice) => SavedScreen(
-        invoice: invoice,
-        onDone: () => _bloc.add(const ResetRequested()),
-        onScanAnother: _scanAnother,
-      ),
+          invoice: invoice,
+          onDone: () => _bloc.add(const ResetRequested()),
+          onScanAnother: _scanAnother,
+        ),
     };
   }
 

@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 
+
 import 'package:invoice_scanner/core/async/cancellation_token.dart';
+import 'package:invoice_scanner/features/invoice_scanner/data/datasources/connectivity_plus_monitor.dart';
 import 'package:invoice_scanner/features/invoice_scanner/data/datasources/document_scanner_datasource.dart';
 import 'package:invoice_scanner/features/invoice_scanner/data/db/app_database.dart';
 import 'package:invoice_scanner/features/invoice_scanner/data/db/open_app_database.dart';
@@ -14,6 +17,8 @@ import 'package:invoice_scanner/features/invoice_scanner/domain/repositories/inv
 import 'package:invoice_scanner/features/invoice_scanner/domain/usecases/capture_invoice.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/usecases/delete_invoice.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/usecases/extract_invoice.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/usecases/extraction_queue_runner.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/usecases/process_extraction_queue.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/usecases/recover_interrupted_work.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/usecases/save_invoice.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/usecases/update_review_draft.dart';
@@ -21,6 +26,7 @@ import 'package:invoice_scanner/features/invoice_scanner/domain/value_objects/cu
 import 'package:invoice_scanner/features/invoice_scanner/domain/value_objects/decimal_value.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/value_objects/iso_date.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/value_objects/money.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/history_cubit.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/invoice_scanner_bloc.dart';
 
 import 'package:path_provider/path_provider.dart';
@@ -32,18 +38,24 @@ class AppScope {
     required this.createBloc,
     required this.watchRecent,
     required this.newId,
+    required this.history,
+    required this.kickQueue,
     required this.dispose,
   });
 
   final InvoiceScannerBloc Function() createBloc;
   final Stream<List<InvoiceRecord>> Function() watchRecent;
   final String Function() newId;
+  final HistoryDependencies history;
+
+  /// Asks the offline queue to look for work (call when the app resumes).
+  final void Function() kickQueue;
   final Future<void> Function() dispose;
 }
 
-/// DEMO wiring: real capture, compression and storage, but a fake extractor,
-/// so the UI can be tried on a device before Firebase is set up. Module 12
-/// replaces this with the Firebase-backed composition.
+/// DEMO wiring: real capture, compression, storage and offline queue, but a
+/// fake extractor, so the UI can be tried on a device before Firebase is set
+/// up. Module 12 replaces the extractor with the Firebase-backed one.
 Future<AppScope> createDemoScope() async {
   final Directory support = await getApplicationSupportDirectory();
   final Directory imageDir = Directory(
@@ -102,6 +114,18 @@ Future<AppScope> createDemoScope() async {
     clock: clock,
   );
 
+  // Recovery above has finished, so the queue may start.
+  final ConnectivityPlusMonitor monitor = ConnectivityPlusMonitor();
+  final ProcessExtractionQueue queue = ProcessExtractionQueue(
+    repository: repository,
+    extract: extract,
+    connectivity: monitor,
+    fallbackCurrency: () => Currency.usd,
+  );
+  final ExtractionQueueRunner runner =
+      ExtractionQueueRunner(pass: queue.runOnce, connectivity: monitor)
+        ..start();
+
   return AppScope(
     createBloc: () => InvoiceScannerBloc(
       captureInvoice: capture,
@@ -115,7 +139,15 @@ Future<AppScope> createDemoScope() async {
     ),
     watchRecent: repository.watchSaved,
     newId: newId,
-    dispose: db.close,
+    history: HistoryDependencies(
+      watchLive: repository.watchLive,
+      delete: delete.call,
+    ),
+    kickQueue: runner.kick,
+    dispose: () async {
+      await runner.stop();
+      await db.close();
+    },
   );
 }
 
@@ -138,9 +170,9 @@ class DemoInvoiceExtractor implements InvoiceExtractor {
   }) async {
     await cancel.race(Future<void>.delayed(delay));
     Money amount(String whole) => Money.tryFromDecimalExact(
-      DecimalValue.tryParse(whole)!,
-      fallbackCurrency,
-    )!;
+          DecimalValue.tryParse(whole)!,
+          fallbackCurrency,
+        )!;
     return Invoice(
       currency: fallbackCurrency,
       currencyAssumed: true,

@@ -32,6 +32,7 @@ void main() {
       onScan: () => scans++,
       onImport: () => imports++,
       onShowTips: () => tips++,
+      onViewAll: () {},
       onOpenInvoice: tappable ? (InvoiceRecord r) => opened.add(r.id) : null,
     );
   }
@@ -154,6 +155,7 @@ void main() {
       onScan: () {},
       onImport: () {},
       onShowTips: () {},
+      onViewAll: () {},
     );
     await pumpLocalized(tester, build());
     await tester.pumpAndSettle();

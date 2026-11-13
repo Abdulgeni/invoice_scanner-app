@@ -39,4 +39,9 @@ abstract interface class InvoiceRepository {
   /// Saved, not-deleted records, newest `savedAt` first. Emits the current
   /// list on listen, then again after every change.
   Stream<List<InvoiceRecord>> watchSaved();
+
+  /// Every live (not deleted) record of any status, most recently updated
+  /// first (ties by id). Emits the current list on listen, then again after
+  /// every change. Undecodable rows are skipped.
+  Stream<List<InvoiceRecord>> watchLive();
 }

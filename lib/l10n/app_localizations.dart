@@ -939,6 +939,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{vendor} · {total}'**
   String savedSummary(String vendor, String total);
+
+  /// No description provided for @historyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoices'**
+  String get historyTitle;
+
+  /// No description provided for @historyViewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get historyViewAll;
+
+  /// No description provided for @historyAttentionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get historyAttentionTitle;
+
+  /// No description provided for @historySavedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get historySavedTitle;
+
+  /// No description provided for @historyEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No invoices yet'**
+  String get historyEmptyTitle;
+
+  /// No description provided for @historyEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan an invoice from the home screen and it will show up here.'**
+  String get historyEmptyBody;
+
+  /// No description provided for @historyLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load your invoices.'**
+  String get historyLoadFailed;
+
+  /// No description provided for @historyUnreadInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice scan'**
+  String get historyUnreadInvoice;
+
+  /// No description provided for @historyContinueHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to continue'**
+  String get historyContinueHint;
+
+  /// No description provided for @statusNotRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Not read yet'**
+  String get statusNotRead;
+
+  /// No description provided for @statusReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading…'**
+  String get statusReading;
+
+  /// No description provided for @statusNeedsReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs review'**
+  String get statusNeedsReview;
+
+  /// No description provided for @statusSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get statusSaved;
+
+  /// No description provided for @deleteInvoiceTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}'**
+  String deleteInvoiceTooltip(String name);
+
+  /// No description provided for @deleteInvoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this invoice?'**
+  String get deleteInvoiceTitle;
+
+  /// No description provided for @deleteInvoiceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently removes the invoice and its images from this device. It can\'t be undone.'**
+  String get deleteInvoiceBody;
+
+  /// No description provided for @deleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteAction;
+
+  /// No description provided for @deleteFailedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t delete. Please try again.'**
+  String get deleteFailedNotice;
+
+  /// No description provided for @invoiceDeletedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice deleted'**
+  String get invoiceDeletedNotice;
+
+  /// No description provided for @privacyTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Data and privacy'**
+  String get privacyTooltip;
+
+  /// No description provided for @privacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data'**
+  String get privacyTitle;
+
+  /// No description provided for @privacyOnDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved invoices stay on this device. Nothing is synced to an account.'**
+  String get privacyOnDevice;
+
+  /// No description provided for @privacyScanImages.
+  ///
+  /// In en, this message translates to:
+  /// **'To read an invoice, its page images are sent over an encrypted connection to an AI service. This app doesn\'t keep them after you save or discard the scan.'**
+  String get privacyScanImages;
+
+  /// No description provided for @privacyRetention.
+  ///
+  /// In en, this message translates to:
+  /// **'Page images are deleted as soon as you save or discard a scan. Scans you haven\'t finished stay here until you do.'**
+  String get privacyRetention;
+
+  /// No description provided for @privacyDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting an invoice erases its data and images from this device right away.'**
+  String get privacyDelete;
+
+  /// No description provided for @detailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice'**
+  String get detailTitle;
+
+  /// No description provided for @detailQuantityTimesPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'{quantity} × {price}'**
+  String detailQuantityTimesPrice(String quantity, String price);
+
+  /// No description provided for @detailNoLines.
+  ///
+  /// In en, this message translates to:
+  /// **'No line items were saved.'**
+  String get detailNoLines;
+
+  /// No description provided for @detailNothingToShow.
+  ///
+  /// In en, this message translates to:
+  /// **'This invoice has no details to show.'**
+  String get detailNothingToShow;
 }
 
 class _AppLocalizationsDelegate

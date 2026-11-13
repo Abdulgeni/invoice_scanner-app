@@ -18,6 +18,7 @@ class HomeScreen extends StatefulWidget {
     required this.onScan,
     required this.onImport,
     required this.onShowTips,
+    required this.onViewAll,
     this.onOpenInvoice,
     super.key,
   });
@@ -26,6 +27,7 @@ class HomeScreen extends StatefulWidget {
   final VoidCallback onScan;
   final VoidCallback onImport;
   final VoidCallback onShowTips;
+  final VoidCallback onViewAll;
   final void Function(InvoiceRecord record)? onOpenInvoice;
 
   static const int maxRecent = 5;

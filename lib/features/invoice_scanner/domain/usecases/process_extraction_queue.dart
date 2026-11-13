@@ -49,7 +49,9 @@ final class QueuePassSummary extends Equatable {
 
 /// One pass over the offline queue.
 ///
-/// Eligible: `pendingExtraction`, and `failed` records whose failure kind
+/// Eligible: `pendingExtraction` records with at least one prior attempt
+/// (an interrupted read the user did ask for), and `failed` records whose
+/// failure kind
 /// `parksInOfflineQueue` (network). Everything else needs the user: a
 /// timeout, quota, cancellation or blocked image is never retried here.
 /// Records are attempted oldest first, one at a time, and a record that has
@@ -83,7 +85,9 @@ class ProcessExtractionQueue {
   bool _isEligible(InvoiceRecord r) {
     if (r.attemptCount >= maxAutoAttempts) return false;
     return switch (r.status) {
-      InvoiceStatus.pendingExtraction => true,
+      // Only reads the user already asked for (interrupted ones). A scan
+      // that was merely captured waits for the user's "Read invoice".
+      InvoiceStatus.pendingExtraction => r.attemptCount > 0,
       InvoiceStatus.failed => r.failureKind?.parksInOfflineQueue ?? false,
       _ => false,
     };
