@@ -240,7 +240,14 @@ class _HistoryTile extends StatelessWidget {
                       ),
                       if (amount != null) ...<Widget>[
                         const SizedBox(width: AppSpacing.sm),
-                        Text(amount, style: AppMoneyStyles.of(context).title),
+                        Flexible(
+                          child: Text(
+                            amount,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppMoneyStyles.of(context).title,
+                          ),
+                        ),
                       ],
                     ],
                   ),

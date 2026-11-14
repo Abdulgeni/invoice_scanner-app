@@ -43,8 +43,8 @@ class ScriptedExtractor implements InvoiceExtractor {
   }
 }
 
-/// Returns a stale snapshot, as if another worker claimed the record after
-/// the list was read.
+/// A repository whose `listByStatus` leaves a stale copy behind: another
+/// pass could have claimed the record before `mutate` runs.
 class RacyRepository extends FakeInvoiceRepository {
   RacyRepository(this.victim);
 
@@ -61,10 +61,16 @@ class RacyRepository extends FakeInvoiceRepository {
 String page(String id) => 'managed/${id}_0.jpg';
 
 InvoiceRecord pending(String id, {DateTime? at}) => InvoiceRecord.queued(
-  id: id,
-  imagePaths: <String>[page(id)],
-  now: at ?? testT0,
-);
+      id: id,
+      imagePaths: <String>[page(id)],
+      now: at ?? testT0,
+    );
+
+/// A read the user asked for that was interrupted (for example by a crash).
+/// `markExtracting` increments `attemptCount` so the queue may pick it up;
+/// a merely-captured record (attemptCount == 0) is never auto-read.
+InvoiceRecord interrupted(String id, {DateTime? at}) =>
+    pending(id, at: at).markExtracting(testT0).markPending(testT0);
 
 InvoiceRecord failedWith(String id, InvoiceErrorKind kind, {DateTime? at}) =>
     pending(id, at: at).markExtracting(testT0).markFailed(kind, testT0);
@@ -117,7 +123,7 @@ void main() {
   test(
     'resumes pending and failed(network), oldest first, one at a time',
     () async {
-      add(pending('late', at: testT0.add(const Duration(minutes: 2))));
+      add(interrupted('late', at: testT0.add(const Duration(minutes: 2))));
       add(
         failedWith(
           'net',
@@ -125,7 +131,7 @@ void main() {
           at: testT0.add(const Duration(minutes: 1)),
         ),
       );
-      add(pending('early'));
+      add(interrupted('early'));
 
       final QueuePassSummary summary = await run(build());
 
@@ -150,6 +156,14 @@ void main() {
       expect(extractor.lastFallback, Currency.eur);
     },
   );
+
+  test('a scan that was only captured is never read automatically', () async {
+    add(pending('fresh'));
+    final QueuePassSummary summary = await run(build());
+    expect(summary.processed, 0);
+    expect(extractor.order, isEmpty);
+    expect(repo.rows['fresh']!.status, InvoiceStatus.pendingExtraction);
+  });
 
   test('leaves everything else alone', () async {
     add(failedWith('timeout', InvoiceErrorKind.timeout));
@@ -183,7 +197,7 @@ void main() {
 
   group('stopping', () {
     test('offline at the start attempts nothing', () async {
-      add(pending('a'));
+      add(interrupted('a'));
       connectivity.online = false;
       final QueuePassSummary summary = await run(build());
       expect(summary.stopReason, QueueStopReason.offline);
@@ -192,8 +206,8 @@ void main() {
     });
 
     test('going offline mid-pass stops before the next record', () async {
-      add(pending('a'));
-      add(pending('b', at: testT0.add(const Duration(minutes: 1))));
+      add(interrupted('a'));
+      add(interrupted('b', at: testT0.add(const Duration(minutes: 1))));
       extractor.onCall = (String _) => connectivity.online = false;
       final QueuePassSummary summary = await run(build());
       expect(summary.stopReason, QueueStopReason.offline);
@@ -204,8 +218,8 @@ void main() {
     test(
       'a network failure ends the pass and keeps the record eligible',
       () async {
-        add(pending('a'));
-        add(pending('b', at: testT0.add(const Duration(minutes: 1))));
+        add(interrupted('a'));
+        add(interrupted('b', at: testT0.add(const Duration(minutes: 1))));
         extractor.errors[page('a')] = const InvoiceFailure(
           InvoiceErrorKind.network,
         );
@@ -224,8 +238,8 @@ void main() {
       ]) {
         repo.rows.clear();
         extractor.order.clear();
-        add(pending('a'));
-        add(pending('b', at: testT0.add(const Duration(minutes: 1))));
+        add(interrupted('a'));
+        add(interrupted('b', at: testT0.add(const Duration(minutes: 1))));
         extractor.errors[page('a')] = InvoiceFailure(kind);
         final QueuePassSummary summary = await run(build());
         expect(summary.stopReason, QueueStopReason.blocked, reason: kind.name);
@@ -234,8 +248,8 @@ void main() {
     });
 
     test('any other failure moves on to the next record', () async {
-      add(pending('a'));
-      add(pending('b', at: testT0.add(const Duration(minutes: 1))));
+      add(interrupted('a'));
+      add(interrupted('b', at: testT0.add(const Duration(minutes: 1))));
       extractor.errors[page('a')] = const InvoiceFailure(
         InvoiceErrorKind.malformedJson,
       );
@@ -246,8 +260,8 @@ void main() {
     });
 
     test('the stop token is honored between records, never mid-call', () async {
-      add(pending('a'));
-      add(pending('b', at: testT0.add(const Duration(minutes: 1))));
+      add(interrupted('a'));
+      add(interrupted('b', at: testT0.add(const Duration(minutes: 1))));
       final CancellationToken stop = CancellationToken();
       extractor.onCall = (String _) => stop.cancel();
       final QueuePassSummary summary = await run(build(), stop);
@@ -260,7 +274,7 @@ void main() {
 
   test('a record claimed by someone else is skipped, not failed', () async {
     final RacyRepository racy = RacyRepository('a');
-    racy.rows['a'] = pending('a');
+    racy.rows['a'] = interrupted('a');
     store.files.add(page('a'));
     final QueuePassSummary summary = await run(build(repository: racy));
     expect(summary.skipped, 1);
