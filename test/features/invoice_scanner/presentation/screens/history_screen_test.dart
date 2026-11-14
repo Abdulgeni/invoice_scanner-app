@@ -12,12 +12,9 @@ import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/hi
 import '../../../../support/fakes.dart';
 import '../../../../support/pump_app.dart';
 
-late StreamController<List<InvoiceRecord>> controller;
-late HistoryCubit cubit;
 late List<String> deleted;
 late List<InvoiceRecord> resumed, opened;
 late DeleteOutcome outcome;
-late int subscriptions;
 
 InvoiceRecord base(String id) => InvoiceRecord.queued(
       id: id,
@@ -42,8 +39,20 @@ InvoiceRecord saved(String id, String vendor, int total) {
       .markSaved(inv, testT0.add(const Duration(minutes: 1)));
 }
 
+HistoryCubit cubitFrom(
+  Stream<List<InvoiceRecord>> Function() watchLive,
+) =>
+    HistoryCubit(
+      watchLive: watchLive,
+      deleteInvoice: (String id) async {
+        deleted.add(id);
+        return outcome;
+      },
+    );
+
 Future<void> pumpHistory(
-  WidgetTester tester, {
+  WidgetTester tester,
+  HistoryCubit cubit, {
   List<InvoiceRecord>? records,
   double textScale = 1,
 }) async {
@@ -55,38 +64,28 @@ Future<void> pumpHistory(
     ),
     textScale: textScale,
   );
-  if (records != null) controller.add(records);
   await tester.pump();
-  await tester.pumpAndSettle();
-  await tester.pumpAndSettle();
 }
+
+/// A cubit preloaded with [records] via `Stream.value` — emits synchronously
+/// on subscription, so the first pump already shows the loaded state.
+HistoryCubit cubitWith(List<InvoiceRecord> records) =>
+    cubitFrom(() => Stream<List<InvoiceRecord>>.value(records));
 
 void main() {
   setUp(() {
-    controller = StreamController<List<InvoiceRecord>>.broadcast();
     deleted = <String>[];
     resumed = <InvoiceRecord>[];
     opened = <InvoiceRecord>[];
     outcome = DeleteOutcome.deleted;
-    subscriptions = 0;
-    cubit = HistoryCubit(
-      watchLive: () {
-        subscriptions++;
-        return controller.stream;
-      },
-      deleteInvoice: (String id) async {
-        deleted.add(id);
-        return outcome;
-      },
-    );
-  });
-
-  tearDown(() async {
-    await cubit.close();
-    await controller.close();
   });
 
   testWidgets('shows progress while loading', (tester) async {
+    final StreamController<List<InvoiceRecord>> controller =
+        StreamController<List<InvoiceRecord>>.broadcast();
+    addTearDown(controller.close);
+    final HistoryCubit cubit = cubitFrom(() => controller.stream);
+    addTearDown(cubit.close);
     await pumpLocalized(
       tester,
       BlocProvider<HistoryCubit>.value(
@@ -99,13 +98,24 @@ void main() {
   });
 
   testWidgets('an empty history says what to do', (tester) async {
-    await pumpHistory(tester, records: const <InvoiceRecord>[]);
+    final HistoryCubit cubit = cubitWith(<InvoiceRecord>[]);
+    addTearDown(cubit.close);
+    await pumpHistory(tester, cubit, records: <InvoiceRecord>[]);
     expect(find.text('No invoices yet'), findsOneWidget);
     expect(find.textContaining('Scan an invoice from the home screen'),
         findsOneWidget);
   });
 
   testWidgets('a broken stream offers a retry', (tester) async {
+    int subscriptions = 0;
+    final HistoryCubit cubit = cubitFrom(() {
+      subscriptions++;
+      if (subscriptions == 1) {
+        return Stream<List<InvoiceRecord>>.error(Exception('db'));
+      }
+      return Stream<List<InvoiceRecord>>.value(<InvoiceRecord>[]);
+    });
+    addTearDown(cubit.close);
     await pumpLocalized(
       tester,
       BlocProvider<HistoryCubit>.value(
@@ -113,29 +123,27 @@ void main() {
         child: HistoryScreen(onResume: resumed.add, onOpenSaved: opened.add),
       ),
     );
-    controller.addError(Exception('db'));
     await tester.pump();
-    await tester.pumpAndSettle();
-    await tester.pumpAndSettle();
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text("We couldn't load your invoices."), findsOneWidget);
     await tester.tap(find.text('Try again'));
     await tester.pump();
+    await tester.pump();
     expect(subscriptions, 2);
+    expect(find.text('No invoices yet'), findsOneWidget);
   });
 
   testWidgets('shows both sections with plain status text', (tester) async {
-    await pumpHistory(
-      tester,
-      records: <InvoiceRecord>[
-        base('p'),
-        reading('r'),
-        review('v'),
-        failed('t', InvoiceErrorKind.timeout),
-        failed('c', InvoiceErrorKind.cancelled),
-        saved('s', 'Saved Co', 1250),
-      ],
-    );
+    final HistoryCubit cubit = cubitWith(<InvoiceRecord>[
+      base('p'),
+      reading('r'),
+      review('v'),
+      failed('t', InvoiceErrorKind.timeout),
+      failed('c', InvoiceErrorKind.cancelled),
+      saved('s', 'Saved Co', 1250),
+    ]);
+    addTearDown(cubit.close);
+    await pumpHistory(tester, cubit);
     expect(find.text('In progress'), findsOneWidget);
     expect(find.text('Saved'), findsWidgets);
     expect(find.text('Not read yet'), findsNWidgets(2));
@@ -147,21 +155,22 @@ void main() {
   });
 
   testWidgets('saved invoices show the date and total', (tester) async {
-    await pumpHistory(tester,
-        records: <InvoiceRecord>[saved('s', 'Saved Co', 1250)]);
+    final HistoryCubit cubit =
+        cubitWith(<InvoiceRecord>[saved('s', 'Saved Co', 1250)]);
+    addTearDown(cubit.close);
+    await pumpHistory(tester, cubit);
     expect(find.text('Saved Co'), findsOneWidget);
     expect(find.textContaining('12.50'), findsOneWidget);
     expect(find.textContaining('Nov 1, 2026'), findsOneWidget);
   });
 
   testWidgets('no status text leaks backend terms', (tester) async {
-    await pumpHistory(
-      tester,
-      records: <InvoiceRecord>[
-        for (final (int i, InvoiceErrorKind k) in InvoiceErrorKind.values.indexed)
-          failed('f$i', k),
-      ],
-    );
+    final HistoryCubit cubit = cubitWith(<InvoiceRecord>[
+      for (final (int i, InvoiceErrorKind k) in InvoiceErrorKind.values.indexed)
+        failed('f$i', k),
+    ]);
+    addTearDown(cubit.close);
+    await pumpHistory(tester, cubit);
     final String all = tester
         .widgetList<Text>(find.byType(Text))
         .map((Text t) => (t.data ?? '').toLowerCase())
@@ -173,10 +182,10 @@ void main() {
 
   testWidgets('tapping an unfinished invoice resumes it, a saved one opens it',
       (tester) async {
-    await pumpHistory(
-      tester,
-      records: <InvoiceRecord>[review('v'), saved('s', 'Saved Co', 500)],
-    );
+    final HistoryCubit cubit = cubitWith(
+        <InvoiceRecord>[review('v'), saved('s', 'Saved Co', 500)]);
+    addTearDown(cubit.close);
+    await pumpHistory(tester, cubit);
     await tester.tap(find.text('Review Co'));
     await tester.tap(find.text('Saved Co'));
     expect(resumed.map((InvoiceRecord r) => r.id), <String>['v']);
@@ -185,7 +194,9 @@ void main() {
 
   group('deleting', () {
     testWidgets('asks first, and Cancel keeps the invoice', (tester) async {
-      await pumpHistory(tester, records: <InvoiceRecord>[review('v')]);
+      final HistoryCubit cubit = cubitWith(<InvoiceRecord>[review('v')]);
+      addTearDown(cubit.close);
+      await pumpHistory(tester, cubit);
       await tester.tap(find.byTooltip('Delete Review Co'));
       await tester.pumpAndSettle();
       expect(find.text('Delete this invoice?'), findsOneWidget);
@@ -197,10 +208,10 @@ void main() {
     });
 
     testWidgets('confirming deletes that invoice only', (tester) async {
-      await pumpHistory(
-        tester,
-        records: <InvoiceRecord>[review('v'), saved('s', 'Saved Co', 500)],
-      );
+      final HistoryCubit cubit = cubitWith(
+          <InvoiceRecord>[review('v'), saved('s', 'Saved Co', 500)]);
+      addTearDown(cubit.close);
+      await pumpHistory(tester, cubit);
       await tester.tap(find.byTooltip('Delete Saved Co'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
@@ -210,7 +221,9 @@ void main() {
 
     testWidgets('a failed delete says so and keeps the list', (tester) async {
       outcome = DeleteOutcome.storageUnavailable;
-      await pumpHistory(tester, records: <InvoiceRecord>[review('v')]);
+      final HistoryCubit cubit = cubitWith(<InvoiceRecord>[review('v')]);
+      addTearDown(cubit.close);
+      await pumpHistory(tester, cubit);
       await tester.tap(find.byTooltip('Delete Review Co'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
@@ -222,7 +235,9 @@ void main() {
 
   testWidgets('the privacy sheet explains retention and deletion',
       (tester) async {
-    await pumpHistory(tester, records: const <InvoiceRecord>[]);
+    final HistoryCubit cubit = cubitWith(<InvoiceRecord>[]);
+    addTearDown(cubit.close);
+    await pumpHistory(tester, cubit);
     await tester.tap(find.byTooltip('Data and privacy'));
     await tester.pumpAndSettle();
     expect(find.text('Your data'), findsOneWidget);
@@ -232,7 +247,9 @@ void main() {
   });
 
   testWidgets('controls meet the 48dp touch target', (tester) async {
-    await pumpHistory(tester, records: <InvoiceRecord>[review('v')]);
+    final HistoryCubit cubit = cubitWith(<InvoiceRecord>[review('v')]);
+    addTearDown(cubit.close);
+    await pumpHistory(tester, cubit);
     expect(tester.getSize(find.byTooltip('Delete Review Co')).height,
         greaterThanOrEqualTo(48));
     expect(tester.getSize(find.byTooltip('Data and privacy')).height,
@@ -247,14 +264,12 @@ void main() {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(320, 568);
     addTearDown(tester.view.reset);
-    await pumpHistory(
-      tester,
-      records: <InvoiceRecord>[
-        review('v'),
-        saved('s', 'A Very Long Vendor Name Ltd', 123456),
-      ],
-      textScale: 2,
-    );
+    final HistoryCubit cubit = cubitWith(<InvoiceRecord>[
+      review('v'),
+      saved('s', 'A Very Long Vendor Name Ltd', 123456),
+    ]);
+    addTearDown(cubit.close);
+    await pumpHistory(tester, cubit, textScale: 2);
     expect(tester.takeException(), isNull);
   });
 }
