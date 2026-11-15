@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 
 import 'package:invoice_scanner/core/async/cancellation_token.dart';
 import 'package:invoice_scanner/features/invoice_scanner/data/datasources/connectivity_plus_monitor.dart';
@@ -29,9 +31,6 @@ import 'package:invoice_scanner/features/invoice_scanner/domain/value_objects/mo
 import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/history_cubit.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/invoice_scanner_bloc.dart';
 
-import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
-
 /// Everything the UI needs, built once at startup.
 class AppScope {
   AppScope({
@@ -53,10 +52,13 @@ class AppScope {
   final Future<void> Function() dispose;
 }
 
-/// DEMO wiring: real capture, compression, storage and offline queue, but a
-/// fake extractor, so the UI can be tried on a device before Firebase is set
-/// up. Module 12 replaces the extractor with the Firebase-backed one.
-Future<AppScope> createDemoScope() async {
+/// Builds everything the UI needs. [extractorBuilder] supplies the real
+/// extractor; without it the demo extractor (sample data, no network) is
+/// used so the UI can be tried before Firebase is set up.
+Future<AppScope> createAppScope({
+  InvoiceExtractor Function(String Function() newId)? extractorBuilder,
+  Currency fallbackCurrency = Currency.usd,
+}) async {
   final Directory support = await getApplicationSupportDirectory();
   final Directory imageDir = Directory(
     '${support.path}${Platform.pathSeparator}invoice_images',
@@ -68,7 +70,7 @@ Future<AppScope> createDemoScope() async {
     managedDirPath: imageDir.path,
   );
   final ManagedImageStore store = ManagedImageStore(managedDir: imageDir);
-  DateTime clock() => DateTime.now().toUtc();
+  final Clock clock = () => DateTime.now().toUtc();
   const Uuid uuid = Uuid();
   String newId() => uuid.v4();
   const ScanAnalytics analytics = NoopScanAnalytics();
@@ -93,7 +95,7 @@ Future<AppScope> createDemoScope() async {
   );
   final ExtractInvoice extract = ExtractInvoice(
     repository: repository,
-    extractor: DemoInvoiceExtractor(newId: newId),
+    extractor: extractorBuilder?.call(newId) ?? DemoInvoiceExtractor(newId: newId),
     imageStore: store,
     analytics: analytics,
     clock: clock,
@@ -120,7 +122,7 @@ Future<AppScope> createDemoScope() async {
     repository: repository,
     extract: extract,
     connectivity: monitor,
-    fallbackCurrency: () => Currency.usd,
+    fallbackCurrency: () => fallbackCurrency,
   );
   final ExtractionQueueRunner runner =
       ExtractionQueueRunner(pass: queue.runOnce, connectivity: monitor)
@@ -135,7 +137,7 @@ Future<AppScope> createDemoScope() async {
       updateReviewDraft: draft,
       loadRecord: repository.get,
       clock: clock,
-      fallbackCurrency: () => Currency.usd,
+      fallbackCurrency: () => fallbackCurrency,
     ),
     watchRecent: repository.watchSaved,
     newId: newId,
