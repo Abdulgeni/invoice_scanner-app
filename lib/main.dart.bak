@@ -1,0 +1,95 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'package:invoice_scanner/app/app_composition.dart';
+import 'package:invoice_scanner/app/app_config.dart';
+import 'package:invoice_scanner/app/firebase_bootstrap.dart';
+import 'package:invoice_scanner/core/theme/app_theme.dart';
+import 'package:invoice_scanner/features/invoice_scanner/data/usage/daily_usage_counter.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/repositories/invoice_extractor.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/invoice_scanner_bloc.dart';
+import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/scanner_flow_screen.dart';
+import 'package:invoice_scanner/l10n/app_localizations.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  const AppConfig config = AppConfig();
+
+  InvoiceExtractor Function(String Function() newId)? extractorBuilder;
+  if (!config.useDemoExtractor) {
+    final FirebaseServices? services = await initializeFirebase(config);
+    final Directory support = await getApplicationSupportDirectory();
+    final DailyUsageCounter counter = DailyUsageCounter(
+      file: File('${support.path}${Platform.pathSeparator}usage_counter.json'),
+      clock: () => DateTime.now().toUtc(),
+    );
+    extractorBuilder = (String Function() newId) => buildFirebaseExtractor(
+          services: services,
+          config: config,
+          newId: newId,
+          counter: counter,
+        );
+  }
+
+  final AppScope scope = await createAppScope(
+    extractorBuilder: extractorBuilder,
+    fallbackCurrency: config.fallbackCurrency,
+  );
+  runApp(InvoiceScannerApp(scope: scope));
+}
+
+class InvoiceScannerApp extends StatefulWidget {
+  const InvoiceScannerApp({required this.scope, super.key});
+
+  final AppScope scope;
+
+  @override
+  State<InvoiceScannerApp> createState() => _InvoiceScannerAppState();
+}
+
+class _InvoiceScannerAppState extends State<InvoiceScannerApp>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) widget.scope.kickQueue();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    unawaited(widget.scope.dispose());
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final AppScope scope = widget.scope;
+    return MaterialApp(
+      onGenerateTitle: (BuildContext context) =>
+          AppLocalizations.of(context).appTitle,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
+      home: BlocProvider<InvoiceScannerBloc>(
+        create: (BuildContext context) => scope.createBloc(),
+        child: ScannerFlowScreen(
+          watchRecent: scope.watchRecent,
+          newLineId: scope.newId,
+          history: scope.history,
+        ),
+      ),
+    );
+  }
+}

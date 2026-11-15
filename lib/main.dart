@@ -1,17 +1,45 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:invoice_scanner/app/app_composition.dart';
+import 'package:invoice_scanner/app/app_config.dart';
+import 'package:invoice_scanner/app/firebase_bootstrap.dart';
 import 'package:invoice_scanner/core/theme/app_theme.dart';
+import 'package:invoice_scanner/features/invoice_scanner/data/usage/daily_usage_counter.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/repositories/invoice_extractor.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/invoice_scanner_bloc.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/screens/scanner_flow_screen.dart';
 import 'package:invoice_scanner/l10n/app_localizations.dart';
 
+import 'package:path_provider/path_provider.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final AppScope scope = await createDemoScope();
+  const AppConfig config = AppConfig();
+
+  InvoiceExtractor Function(String Function() newId)? extractorBuilder;
+  if (!config.useDemoExtractor) {
+    final FirebaseServices? services = await initializeFirebase(config);
+    final Directory support = await getApplicationSupportDirectory();
+    final DailyUsageCounter counter = DailyUsageCounter(
+      file: File('${support.path}${Platform.pathSeparator}usage_counter.json'),
+      clock: () => DateTime.now().toUtc(),
+    );
+    extractorBuilder = (String Function() newId) => buildFirebaseExtractor(
+          services: services,
+          config: config,
+          newId: newId,
+          counter: counter,
+        );
+  }
+
+  final AppScope scope = await createAppScope(
+    extractorBuilder: extractorBuilder,
+    fallbackCurrency: config.fallbackCurrency,
+  );
   runApp(InvoiceScannerApp(scope: scope));
 }
 

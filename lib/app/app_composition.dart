@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
 
 import 'package:invoice_scanner/core/async/cancellation_token.dart';
 import 'package:invoice_scanner/features/invoice_scanner/data/datasources/connectivity_plus_monitor.dart';
@@ -30,6 +28,9 @@ import 'package:invoice_scanner/features/invoice_scanner/domain/value_objects/is
 import 'package:invoice_scanner/features/invoice_scanner/domain/value_objects/money.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/history_cubit.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/invoice_scanner_bloc.dart';
+
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 
 /// Everything the UI needs, built once at startup.
 class AppScope {
@@ -70,7 +71,7 @@ Future<AppScope> createAppScope({
     managedDirPath: imageDir.path,
   );
   final ManagedImageStore store = ManagedImageStore(managedDir: imageDir);
-  final Clock clock = () => DateTime.now().toUtc();
+  DateTime clock() => DateTime.now().toUtc();
   const Uuid uuid = Uuid();
   String newId() => uuid.v4();
   const ScanAnalytics analytics = NoopScanAnalytics();
