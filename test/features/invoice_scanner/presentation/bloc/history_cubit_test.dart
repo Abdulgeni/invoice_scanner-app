@@ -16,25 +16,25 @@ late int subscriptions;
 Object? firstError;
 
 InvoiceRecord pending(String id) => InvoiceRecord.queued(
-      id: id,
-      imagePaths: <String>['managed/${id}_0.jpg'],
-      now: testT0,
-    );
+  id: id,
+  imagePaths: <String>['managed/${id}_0.jpg'],
+  now: testT0,
+);
 
 HistoryCubit make() => HistoryCubit(
-      watchLive: () {
-        subscriptions++;
-        final Object? error = firstError;
-        if (subscriptions == 1 && error != null) {
-          return Stream<List<InvoiceRecord>>.error(error);
-        }
-        return controller.stream;
-      },
-      deleteInvoice: (String id) async {
-        deleted.add(id);
-        return outcome;
-      },
-    );
+  watchLive: () {
+    subscriptions++;
+    final Object? error = firstError;
+    if (subscriptions == 1 && error != null) {
+      return Stream<List<InvoiceRecord>>.error(error);
+    }
+    return controller.stream;
+  },
+  deleteInvoice: (String id) async {
+    deleted.add(id);
+    return outcome;
+  },
+);
 
 void main() {
   setUp(() {
@@ -128,14 +128,23 @@ void main() {
       c.noticeShown();
     },
     expect: () => <Matcher>[
+      isA<HistoryLoaded>().having(
+        (HistoryLoaded s) => s.notice,
+        'notice',
+        isNull,
+      ),
       isA<HistoryLoaded>()
-          .having((HistoryLoaded s) => s.notice, 'notice', isNull),
-      isA<HistoryLoaded>()
-          .having((HistoryLoaded s) => s.notice, 'notice',
-              HistoryNotice.deleteFailed)
+          .having(
+            (HistoryLoaded s) => s.notice,
+            'notice',
+            HistoryNotice.deleteFailed,
+          )
           .having((HistoryLoaded s) => s.sections.attention.length, 'kept', 1),
-      isA<HistoryLoaded>()
-          .having((HistoryLoaded s) => s.notice, 'notice', isNull),
+      isA<HistoryLoaded>().having(
+        (HistoryLoaded s) => s.notice,
+        'notice',
+        isNull,
+      ),
     ],
   );
 

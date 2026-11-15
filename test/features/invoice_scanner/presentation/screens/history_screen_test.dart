@@ -17,16 +17,16 @@ late List<InvoiceRecord> resumed, opened;
 late DeleteOutcome outcome;
 
 InvoiceRecord base(String id) => InvoiceRecord.queued(
-      id: id,
-      imagePaths: <String>['managed/${id}_0.jpg'],
-      now: testT0,
-    );
+  id: id,
+  imagePaths: <String>['managed/${id}_0.jpg'],
+  now: testT0,
+);
 
 InvoiceRecord reading(String id) => base(id).markExtracting(testT0);
 
-InvoiceRecord review(String id, {String vendor = 'Review Co'}) => base(id)
-    .markExtracting(testT0)
-    .markNeedsReview(sampleInvoice(vendor: vendor), testT0);
+InvoiceRecord review(String id, {String vendor = 'Review Co'}) => base(
+  id,
+).markExtracting(testT0).markNeedsReview(sampleInvoice(vendor: vendor), testT0);
 
 InvoiceRecord failed(String id, InvoiceErrorKind kind) =>
     base(id).markFailed(kind, testT0);
@@ -39,9 +39,7 @@ InvoiceRecord saved(String id, String vendor, int total) {
       .markSaved(inv, testT0.add(const Duration(minutes: 1)));
 }
 
-HistoryCubit cubitFrom(
-  Stream<List<InvoiceRecord>> Function() watchLive,
-) =>
+HistoryCubit cubitFrom(Stream<List<InvoiceRecord>> Function() watchLive) =>
     HistoryCubit(
       watchLive: watchLive,
       deleteInvoice: (String id) async {
@@ -102,8 +100,10 @@ void main() {
     addTearDown(cubit.close);
     await pumpHistory(tester, cubit, records: <InvoiceRecord>[]);
     expect(find.text('No invoices yet'), findsOneWidget);
-    expect(find.textContaining('Scan an invoice from the home screen'),
-        findsOneWidget);
+    expect(
+      find.textContaining('Scan an invoice from the home screen'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('a broken stream offers a retry', (tester) async {
@@ -155,8 +155,9 @@ void main() {
   });
 
   testWidgets('saved invoices show the date and total', (tester) async {
-    final HistoryCubit cubit =
-        cubitWith(<InvoiceRecord>[saved('s', 'Saved Co', 1250)]);
+    final HistoryCubit cubit = cubitWith(<InvoiceRecord>[
+      saved('s', 'Saved Co', 1250),
+    ]);
     addTearDown(cubit.close);
     await pumpHistory(tester, cubit);
     expect(find.text('Saved Co'), findsOneWidget);
@@ -175,22 +176,31 @@ void main() {
         .widgetList<Text>(find.byType(Text))
         .map((Text t) => (t.data ?? '').toLowerCase())
         .join(' ');
-    for (final String term in <String>['firebase', 'gemini', 'quota', 'app check']) {
+    for (final String term in <String>[
+      'firebase',
+      'gemini',
+      'quota',
+      'app check',
+    ]) {
       expect(all, isNot(contains(term)));
     }
   });
 
-  testWidgets('tapping an unfinished invoice resumes it, a saved one opens it',
-      (tester) async {
-    final HistoryCubit cubit = cubitWith(
-        <InvoiceRecord>[review('v'), saved('s', 'Saved Co', 500)]);
-    addTearDown(cubit.close);
-    await pumpHistory(tester, cubit);
-    await tester.tap(find.text('Review Co'));
-    await tester.tap(find.text('Saved Co'));
-    expect(resumed.map((InvoiceRecord r) => r.id), <String>['v']);
-    expect(opened.map((InvoiceRecord r) => r.id), <String>['s']);
-  });
+  testWidgets(
+    'tapping an unfinished invoice resumes it, a saved one opens it',
+    (tester) async {
+      final HistoryCubit cubit = cubitWith(<InvoiceRecord>[
+        review('v'),
+        saved('s', 'Saved Co', 500),
+      ]);
+      addTearDown(cubit.close);
+      await pumpHistory(tester, cubit);
+      await tester.tap(find.text('Review Co'));
+      await tester.tap(find.text('Saved Co'));
+      expect(resumed.map((InvoiceRecord r) => r.id), <String>['v']);
+      expect(opened.map((InvoiceRecord r) => r.id), <String>['s']);
+    },
+  );
 
   group('deleting', () {
     testWidgets('asks first, and Cancel keeps the invoice', (tester) async {
@@ -208,8 +218,10 @@ void main() {
     });
 
     testWidgets('confirming deletes that invoice only', (tester) async {
-      final HistoryCubit cubit = cubitWith(
-          <InvoiceRecord>[review('v'), saved('s', 'Saved Co', 500)]);
+      final HistoryCubit cubit = cubitWith(<InvoiceRecord>[
+        review('v'),
+        saved('s', 'Saved Co', 500),
+      ]);
       addTearDown(cubit.close);
       await pumpHistory(tester, cubit);
       await tester.tap(find.byTooltip('Delete Saved Co'));
@@ -233,16 +245,19 @@ void main() {
     });
   });
 
-  testWidgets('the privacy sheet explains retention and deletion',
-      (tester) async {
+  testWidgets('the privacy sheet explains retention and deletion', (
+    tester,
+  ) async {
     final HistoryCubit cubit = cubitWith(<InvoiceRecord>[]);
     addTearDown(cubit.close);
     await pumpHistory(tester, cubit);
     await tester.tap(find.byTooltip('Data and privacy'));
     await tester.pumpAndSettle();
     expect(find.text('Your data'), findsOneWidget);
-    expect(find.textContaining('deleted as soon as you save or discard'),
-        findsOneWidget);
+    expect(
+      find.textContaining('deleted as soon as you save or discard'),
+      findsOneWidget,
+    );
     expect(find.textContaining('erases its data and images'), findsOneWidget);
   });
 
@@ -250,17 +265,21 @@ void main() {
     final HistoryCubit cubit = cubitWith(<InvoiceRecord>[review('v')]);
     addTearDown(cubit.close);
     await pumpHistory(tester, cubit);
-    expect(tester.getSize(find.byTooltip('Delete Review Co')).height,
-        greaterThanOrEqualTo(48));
-    expect(tester.getSize(find.byTooltip('Data and privacy')).height,
-        greaterThanOrEqualTo(48));
     expect(
-        tester.getSize(find.byKey(const ValueKey<String>('history:v'))).height,
-        greaterThanOrEqualTo(48));
+      tester.getSize(find.byTooltip('Delete Review Co')).height,
+      greaterThanOrEqualTo(48),
+    );
+    expect(
+      tester.getSize(find.byTooltip('Data and privacy')).height,
+      greaterThanOrEqualTo(48),
+    );
+    expect(
+      tester.getSize(find.byKey(const ValueKey<String>('history:v'))).height,
+      greaterThanOrEqualTo(48),
+    );
   });
 
-  testWidgets('stays usable at 320 wide with double text size',
-      (tester) async {
+  testWidgets('stays usable at 320 wide with double text size', (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(320, 568);
     addTearDown(tester.view.reset);

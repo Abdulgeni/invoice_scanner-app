@@ -6,7 +6,11 @@ void main() {
   test('safe defaults', () {
     const AppConfig c = AppConfig();
     expect(c.useDemoExtractor, isFalse);
-    expect(c.useDeveloperApi, isFalse, reason: 'real invoices need Agent Platform');
+    expect(
+      c.useDeveloperApi,
+      isFalse,
+      reason: 'real invoices need Agent Platform',
+    );
     expect(c.dailyExtractionCap, 60);
     expect(c.limitedUseAppCheckTokens, isFalse);
     expect(c.fallbackCurrency, Currency.usd);
@@ -19,18 +23,30 @@ void main() {
   });
 
   test('an unusable fallback currency falls back to USD', () {
-    expect(const AppConfig(fallbackCurrencyCode: 'etb').fallbackCurrency.code, 'ETB');
-    expect(const AppConfig(fallbackCurrencyCode: 'nope').fallbackCurrency, Currency.usd);
-    expect(const AppConfig(fallbackCurrencyCode: '').fallbackCurrency, Currency.usd);
+    expect(
+      const AppConfig(fallbackCurrencyCode: 'etb').fallbackCurrency.code,
+      'ETB',
+    );
+    expect(
+      const AppConfig(fallbackCurrencyCode: 'nope').fallbackCurrency,
+      Currency.usd,
+    );
+    expect(
+      const AppConfig(fallbackCurrencyCode: '').fallbackCurrency,
+      Currency.usd,
+    );
   });
 
   group('the App Check debug provider', () {
-    bool use({required bool debug, required bool release, required bool forced}) =>
-        AppConfig.debugProviderFor(
-          debugMode: debug,
-          releaseMode: release,
-          forced: forced,
-        );
+    bool use({
+      required bool debug,
+      required bool release,
+      required bool forced,
+    }) => AppConfig.debugProviderFor(
+      debugMode: debug,
+      releaseMode: release,
+      forced: forced,
+    );
 
     test('is used in debug builds', () {
       expect(use(debug: true, release: false, forced: false), isTrue);

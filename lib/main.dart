@@ -29,11 +29,11 @@ Future<void> main() async {
       clock: () => DateTime.now().toUtc(),
     );
     extractorBuilder = (String Function() newId) => buildFirebaseExtractor(
-          services: services,
-          config: config,
-          newId: newId,
-          counter: counter,
-        );
+      services: services,
+      config: config,
+      newId: newId,
+      counter: counter,
+    );
   }
 
   final AppScope scope = await createAppScope(

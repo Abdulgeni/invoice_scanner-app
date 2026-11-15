@@ -48,9 +48,9 @@ class HistoryCubit extends Cubit<HistoryState> {
   HistoryCubit({
     required Stream<List<InvoiceRecord>> Function() watchLive,
     required Future<DeleteOutcome> Function(String id) deleteInvoice,
-  })  : _watchLive = watchLive,
-        _delete = deleteInvoice,
-        super(const HistoryLoading()) {
+  }) : _watchLive = watchLive,
+       _delete = deleteInvoice,
+       super(const HistoryLoading()) {
     _subscribe();
   }
 

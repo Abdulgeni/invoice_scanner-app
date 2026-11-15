@@ -60,11 +60,12 @@ class HistoryScreen extends StatelessWidget {
           ),
           body: SafeArea(
             child: switch (state) {
-              HistoryLoading() =>
-                const Center(child: CircularProgressIndicator()),
+              HistoryLoading() => const Center(
+                child: CircularProgressIndicator(),
+              ),
               HistoryFailed() => _FailedView(
-                  onRetry: () => context.read<HistoryCubit>().retry(),
-                ),
+                onRetry: () => context.read<HistoryCubit>().retry(),
+              ),
               HistoryLoaded(:final HistorySections sections) =>
                 sections.isEmpty
                     ? const _EmptyView()
@@ -176,8 +177,9 @@ class _HistoryTile extends StatelessWidget {
     final bool saved = record.status == InvoiceStatus.saved;
     final String title = recordTitle(l10n, record);
     final DateTime? date = record.invoice?.invoiceDate;
-    final String dateText =
-        date == null ? l10n.recentNoDate : DateFormat.yMMMd(locale).format(date);
+    final String dateText = date == null
+        ? l10n.recentNoDate
+        : DateFormat.yMMMd(locale).format(date);
     final String subtitle = saved ? dateText : recordStatus(l10n, record);
     final String? hint = saved ? null : l10n.historyContinueHint;
     final Money? total = record.invoice?.total;
@@ -185,9 +187,12 @@ class _HistoryTile extends StatelessWidget {
         ? MoneyFormatter(locale).format(total)
         : (saved ? l10n.recentNoTotal : null);
 
-    final String label = <String?>[title, subtitle, hint, amount]
-        .whereType<String>()
-        .join(', ');
+    final String label = <String?>[
+      title,
+      subtitle,
+      hint,
+      amount,
+    ].whereType<String>().join(', ');
 
     return Card(
       child: Row(

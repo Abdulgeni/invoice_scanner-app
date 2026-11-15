@@ -122,8 +122,9 @@ class FakeInvoiceRepository implements InvoiceRepository {
   }
 
   List<InvoiceRecord> _live() {
-    final List<InvoiceRecord> live =
-        rows.values.where((InvoiceRecord r) => !r.isDeleted).toList();
+    final List<InvoiceRecord> live = rows.values
+        .where((InvoiceRecord r) => !r.isDeleted)
+        .toList();
     live.sort((InvoiceRecord a, InvoiceRecord b) {
       final int byTime = b.updatedAt.compareTo(a.updatedAt);
       return byTime != 0 ? byTime : a.id.compareTo(b.id);

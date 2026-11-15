@@ -19,26 +19,27 @@ abstract final class AuthDebugCodes {
 InvoiceFailure mapAuthError(String code) {
   return switch (code) {
     'network-request-failed' => const InvoiceFailure(
-        InvoiceErrorKind.network,
-        debugCode: AuthDebugCodes.network,
-      ),
+      InvoiceErrorKind.network,
+      debugCode: AuthDebugCodes.network,
+    ),
     'too-many-requests' => const InvoiceFailure(
-        InvoiceErrorKind.quotaExceeded,
-        debugCode: AuthDebugCodes.rateLimited,
-      ),
+      InvoiceErrorKind.quotaExceeded,
+      debugCode: AuthDebugCodes.rateLimited,
+    ),
     'operation-not-allowed' => const InvoiceFailure(
-        InvoiceErrorKind.unknown,
-        debugCode: AuthDebugCodes.anonymousDisabled,
-      ),
-    'invalid-api-key' || 'app-not-authorized' || 'api-key-not-valid' =>
-      const InvoiceFailure(
-        InvoiceErrorKind.unknown,
-        debugCode: AuthDebugCodes.keyRejected,
-      ),
+      InvoiceErrorKind.unknown,
+      debugCode: AuthDebugCodes.anonymousDisabled,
+    ),
+    'invalid-api-key' ||
+    'app-not-authorized' ||
+    'api-key-not-valid' => const InvoiceFailure(
+      InvoiceErrorKind.unknown,
+      debugCode: AuthDebugCodes.keyRejected,
+    ),
     _ => const InvoiceFailure(
-        InvoiceErrorKind.unknown,
-        debugCode: AuthDebugCodes.other,
-      ),
+      InvoiceErrorKind.unknown,
+      debugCode: AuthDebugCodes.other,
+    ),
   };
 }
 
@@ -49,8 +50,8 @@ class AnonymousAuthGate {
   AnonymousAuthGate({
     required bool Function() hasUser,
     required Future<void> Function() signIn,
-  })  : _hasUser = hasUser,
-        _signIn = signIn;
+  }) : _hasUser = hasUser,
+       _signIn = signIn;
 
   factory AnonymousAuthGate.fromFirebase(FirebaseAuth auth) {
     return AnonymousAuthGate(

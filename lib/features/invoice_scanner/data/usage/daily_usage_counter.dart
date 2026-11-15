@@ -13,8 +13,8 @@ import 'package:invoice_scanner/features/invoice_scanner/domain/value_objects/is
 /// use) rather than locking the user out over a disk problem.
 class DailyUsageCounter {
   DailyUsageCounter({required File file, required Clock clock})
-      : _file = file,
-        _clock = clock;
+    : _file = file,
+      _clock = clock;
 
   final File _file;
   final Clock _clock;

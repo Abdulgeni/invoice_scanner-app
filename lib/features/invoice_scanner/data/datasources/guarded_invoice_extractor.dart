@@ -16,8 +16,8 @@ class AuthGatedInvoiceExtractor implements InvoiceExtractor {
   AuthGatedInvoiceExtractor({
     required InvoiceExtractor inner,
     required Future<void> Function() ensureSignedIn,
-  })  : _inner = inner,
-        _ensureSignedIn = ensureSignedIn;
+  }) : _inner = inner,
+       _ensureSignedIn = ensureSignedIn;
 
   final InvoiceExtractor _inner;
   final Future<void> Function() _ensureSignedIn;
@@ -46,9 +46,9 @@ class CappedInvoiceExtractor implements InvoiceExtractor {
     required InvoiceExtractor inner,
     required DailyUsageCounter counter,
     required int cap,
-  })  : _inner = inner,
-        _counter = counter,
-        _cap = cap;
+  }) : _inner = inner,
+       _counter = counter,
+       _cap = cap;
 
   final InvoiceExtractor _inner;
   final DailyUsageCounter _counter;

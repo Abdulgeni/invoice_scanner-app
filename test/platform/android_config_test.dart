@@ -11,16 +11,21 @@ void main() {
   late String manifest;
 
   setUpAll(() {
-    manifest = File('android/app/src/main/AndroidManifest.xml').readAsStringSync();
+    manifest = File(
+      'android/app/src/main/AndroidManifest.xml',
+    ).readAsStringSync();
   });
 
   bool declares(String permission) => RegExp(
-        '<uses-permission[^>]*android\\.permission\\.$permission',
-      ).hasMatch(manifest);
+    '<uses-permission[^>]*android\\.permission\\.$permission',
+  ).hasMatch(manifest);
 
   test('release builds can reach the network', () {
-    expect(declares('INTERNET'), isTrue,
-        reason: 'debug builds add INTERNET by themselves; release builds do not');
+    expect(
+      declares('INTERNET'),
+      isTrue,
+      reason: 'debug builds add INTERNET by themselves; release builds do not',
+    );
     expect(declares('ACCESS_NETWORK_STATE'), isTrue);
   });
 
@@ -49,8 +54,9 @@ void main() {
   test('minSdk is 24', () {
     final File kts = File('android/app/build.gradle.kts');
     final File groovy = File('android/app/build.gradle');
-    final String gradle =
-        kts.existsSync() ? kts.readAsStringSync() : groovy.readAsStringSync();
+    final String gradle = kts.existsSync()
+        ? kts.readAsStringSync()
+        : groovy.readAsStringSync();
     expect(RegExp(r'minSdk(Version)?\s*=?\s*24\b').hasMatch(gradle), isTrue);
   });
 }

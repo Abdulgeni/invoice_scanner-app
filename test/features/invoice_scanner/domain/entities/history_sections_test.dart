@@ -8,10 +8,10 @@ import '../../../../support/fakes.dart';
 DateTime at(int minutes) => testT0.add(Duration(minutes: minutes));
 
 InvoiceRecord base(String id, {int created = 0}) => InvoiceRecord.queued(
-      id: id,
-      imagePaths: <String>['managed/${id}_0.jpg'],
-      now: at(created),
-    );
+  id: id,
+  imagePaths: <String>['managed/${id}_0.jpg'],
+  now: at(created),
+);
 
 InvoiceRecord saved(String id, {required int savedAt}) => base(id)
     .markExtracting(at(1))
@@ -32,13 +32,19 @@ void main() {
     final HistorySections s = groupHistory(<InvoiceRecord>[
       base('pending'),
       base('reading').markExtracting(at(1)),
-      base('review').markExtracting(at(1)).markNeedsReview(sampleInvoice(), at(1)),
+      base(
+        'review',
+      ).markExtracting(at(1)).markNeedsReview(sampleInvoice(), at(1)),
       base('failed').markFailed(InvoiceErrorKind.timeout, at(1)),
       saved('done', savedAt: 5),
     ]);
     expect(ids(s.saved), <String>['done']);
-    expect(ids(s.attention).toSet(),
-        <String>{'pending', 'reading', 'review', 'failed'});
+    expect(ids(s.attention).toSet(), <String>{
+      'pending',
+      'reading',
+      'review',
+      'failed',
+    });
   });
 
   test('unfinished work is ordered by last update, newest first', () {

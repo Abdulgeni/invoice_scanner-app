@@ -6,8 +6,10 @@ import 'package:invoice_scanner/features/invoice_scanner/domain/entities/invoice
 final class HistorySections extends Equatable {
   const HistorySections({required this.attention, required this.saved});
 
-  static const HistorySections empty =
-      HistorySections(attention: <InvoiceRecord>[], saved: <InvoiceRecord>[]);
+  static const HistorySections empty = HistorySections(
+    attention: <InvoiceRecord>[],
+    saved: <InvoiceRecord>[],
+  );
 
   /// Not read, being read, awaiting review, or failed. Most recently
   /// updated first.

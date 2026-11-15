@@ -43,14 +43,15 @@ Future<FirebaseServices?> initializeFirebase(AppConfig config) async {
 
     final RemoteConfigModelNameSource models =
         await RemoteConfigModelNameSource.initialize(
-      FirebaseRemoteConfig.instance,
-      minimumFetchInterval: kReleaseMode
-          ? const Duration(hours: 1)
-          : const Duration(minutes: 1),
-    );
+          FirebaseRemoteConfig.instance,
+          minimumFetchInterval: kReleaseMode
+              ? const Duration(hours: 1)
+              : const Duration(minutes: 1),
+        );
 
-    final AnonymousAuthGate auth =
-        AnonymousAuthGate.fromFirebase(FirebaseAuth.instance);
+    final AnonymousAuthGate auth = AnonymousAuthGate.fromFirebase(
+      FirebaseAuth.instance,
+    );
     unawaited(_warmUp(auth));
     return FirebaseServices(auth: auth, models: models);
   } on Object catch (error) {

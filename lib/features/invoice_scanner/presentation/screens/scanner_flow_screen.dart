@@ -225,40 +225,40 @@ class _ScannerFlowScreenState extends State<ScannerFlowScreen>
   /// same key (no transition replay), and optimizing and reading share the
   /// processing screen so the sweep continues while only the stage changes.
   String _stageOf(InvoiceScannerState state) => switch (state) {
-        InvoiceScannerInitial() => 'home',
-        InvoiceCapturing() => 'capturing',
-        InvoicePreprocessing() || InvoiceExtracting() => 'processing',
-        InvoiceCaptureFailure() => 'captureFailure',
-        InvoiceImageReady() => 'preview',
-        InvoiceExtractionFailure() => 'failure',
-        InvoiceReviewing() => 'review',
-        InvoiceSaving() => 'saving',
-        InvoiceSaved() => 'saved',
-      };
+    InvoiceScannerInitial() => 'home',
+    InvoiceCapturing() => 'capturing',
+    InvoicePreprocessing() || InvoiceExtracting() => 'processing',
+    InvoiceCaptureFailure() => 'captureFailure',
+    InvoiceImageReady() => 'preview',
+    InvoiceExtractionFailure() => 'failure',
+    InvoiceReviewing() => 'review',
+    InvoiceSaving() => 'saving',
+    InvoiceSaved() => 'saved',
+  };
 
   Widget _viewFor(BuildContext context, InvoiceScannerState state) {
     return switch (state) {
       InvoiceScannerInitial() => HomeScreen(
-          watchRecent: widget.watchRecent,
-          onScan: _scan,
-          onImport: () => _start(ScanSource.gallery),
-          onShowTips: () => showScanGuidanceSheet(context, showStart: false),
-          onViewAll: _openHistory,
-          onOpenInvoice: _openDetail,
-        ),
+        watchRecent: widget.watchRecent,
+        onScan: _scan,
+        onImport: () => _start(ScanSource.gallery),
+        onShowTips: () => showScanGuidanceSheet(context, showStart: false),
+        onViewAll: _openHistory,
+        onOpenInvoice: _openDetail,
+      ),
       InvoiceCapturing() => CaptureProgressView(
-          onCancel: () => _bloc.add(const CancelRequested()),
-        ),
+        onCancel: () => _bloc.add(const CancelRequested()),
+      ),
       InvoicePreprocessing(:final pagePaths) => ProcessingScreen(
-          stage: ProcessingStage.optimizing,
-          pagePaths: pagePaths,
-          onCancel: () => _bloc.add(const CancelRequested()),
-        ),
+        stage: ProcessingStage.optimizing,
+        pagePaths: pagePaths,
+        onCancel: () => _bloc.add(const CancelRequested()),
+      ),
       InvoiceExtracting(:final pagePaths) => ProcessingScreen(
-          stage: ProcessingStage.reading,
-          pagePaths: pagePaths,
-          onCancel: () => _bloc.add(const CancelRequested()),
-        ),
+        stage: ProcessingStage.reading,
+        pagePaths: pagePaths,
+        onCancel: () => _bloc.add(const CancelRequested()),
+      ),
       InvoiceCaptureFailure(:final reason, :final maxPages) =>
         CaptureFailureView(
           reason: reason,
@@ -267,32 +267,31 @@ class _ScannerFlowScreenState extends State<ScannerFlowScreen>
           onDone: () => _bloc.add(const ResetRequested()),
         ),
       InvoiceImageReady(:final pagePaths) => PreviewScreen(
-          pagePaths: pagePaths,
-          onRead: () => _bloc.add(const ExtractRequested()),
-          onRetake: () => _bloc.add(const RetakeRequested()),
-          onDiscard: _confirmDiscard,
-        ),
+        pagePaths: pagePaths,
+        onRead: () => _bloc.add(const ExtractRequested()),
+        onRetake: () => _bloc.add(const RetakeRequested()),
+        onDiscard: _confirmDiscard,
+      ),
       final InvoiceExtractionFailure failure => ExtractionFailureScreen(
-          state: failure,
-          onRetry: () => _bloc.add(const ExtractRequested()),
-          onRetake: () => _bloc.add(const RetakeRequested()),
-          onKeep: () => _bloc.add(const KeepImageRequested()),
-          onDiscard: _confirmDiscard,
-        ),
+        state: failure,
+        onRetry: () => _bloc.add(const ExtractRequested()),
+        onRetake: () => _bloc.add(const RetakeRequested()),
+        onKeep: () => _bloc.add(const KeepImageRequested()),
+        onDiscard: _confirmDiscard,
+      ),
       final InvoiceReviewing review => ReviewScreen(
-          state: review,
-          newLineId: widget.newLineId,
-          onChange: (Invoice Function(Invoice) t) =>
-              _bloc.add(InvoiceChanged(t)),
-          onSave: () => _bloc.add(const SaveRequested()),
-          onDiscard: _confirmDiscard,
-        ),
+        state: review,
+        newLineId: widget.newLineId,
+        onChange: (Invoice Function(Invoice) t) => _bloc.add(InvoiceChanged(t)),
+        onSave: () => _bloc.add(const SaveRequested()),
+        onDiscard: _confirmDiscard,
+      ),
       InvoiceSaving() => const SavingView(),
       InvoiceSaved(:final Invoice? invoice) => SavedScreen(
-          invoice: invoice,
-          onDone: () => _bloc.add(const ResetRequested()),
-          onScanAnother: _scanAnother,
-        ),
+        invoice: invoice,
+        onDone: () => _bloc.add(const ResetRequested()),
+        onScanAnother: _scanAnother,
+      ),
     };
   }
 

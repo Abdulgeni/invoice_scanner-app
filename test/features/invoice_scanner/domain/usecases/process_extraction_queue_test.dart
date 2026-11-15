@@ -61,10 +61,10 @@ class RacyRepository extends FakeInvoiceRepository {
 String page(String id) => 'managed/${id}_0.jpg';
 
 InvoiceRecord pending(String id, {DateTime? at}) => InvoiceRecord.queued(
-      id: id,
-      imagePaths: <String>[page(id)],
-      now: at ?? testT0,
-    );
+  id: id,
+  imagePaths: <String>[page(id)],
+  now: at ?? testT0,
+);
 
 /// A read the user asked for that was interrupted (for example by a crash).
 /// `markExtracting` increments `attemptCount` so the queue may pick it up;

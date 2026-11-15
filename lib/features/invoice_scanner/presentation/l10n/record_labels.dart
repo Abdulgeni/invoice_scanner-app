@@ -22,8 +22,8 @@ String recordStatus(AppLocalizations l10n, InvoiceRecord record) {
     InvoiceStatus.needsReview => l10n.statusNeedsReview,
     InvoiceStatus.saved => l10n.statusSaved,
     InvoiceStatus.failed => switch (record.failureKind) {
-        null || InvoiceErrorKind.cancelled => l10n.statusNotRead,
-        final InvoiceErrorKind kind => presentationFor(l10n, kind).title,
-      },
+      null || InvoiceErrorKind.cancelled => l10n.statusNotRead,
+      final InvoiceErrorKind kind => presentationFor(l10n, kind).title,
+    },
   };
 }

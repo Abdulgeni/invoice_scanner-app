@@ -10,13 +10,28 @@ void main() {
     test('maps known codes to the taxonomy', () {
       const Map<String, (InvoiceErrorKind, String)> expected =
           <String, (InvoiceErrorKind, String)>{
-        'network-request-failed': (InvoiceErrorKind.network, AuthDebugCodes.network),
-        'too-many-requests': (InvoiceErrorKind.quotaExceeded, AuthDebugCodes.rateLimited),
-        'operation-not-allowed': (InvoiceErrorKind.unknown, AuthDebugCodes.anonymousDisabled),
-        'invalid-api-key': (InvoiceErrorKind.unknown, AuthDebugCodes.keyRejected),
-        'app-not-authorized': (InvoiceErrorKind.unknown, AuthDebugCodes.keyRejected),
-        'something-new': (InvoiceErrorKind.unknown, AuthDebugCodes.other),
-      };
+            'network-request-failed': (
+              InvoiceErrorKind.network,
+              AuthDebugCodes.network,
+            ),
+            'too-many-requests': (
+              InvoiceErrorKind.quotaExceeded,
+              AuthDebugCodes.rateLimited,
+            ),
+            'operation-not-allowed': (
+              InvoiceErrorKind.unknown,
+              AuthDebugCodes.anonymousDisabled,
+            ),
+            'invalid-api-key': (
+              InvoiceErrorKind.unknown,
+              AuthDebugCodes.keyRejected,
+            ),
+            'app-not-authorized': (
+              InvoiceErrorKind.unknown,
+              AuthDebugCodes.keyRejected,
+            ),
+            'something-new': (InvoiceErrorKind.unknown, AuthDebugCodes.other),
+          };
       expected.forEach((String code, (InvoiceErrorKind, String) e) {
         final InvoiceFailure f = mapAuthError(code);
         expect((f.kind, f.debugCode), e, reason: code);
@@ -31,15 +46,15 @@ void main() {
     Completer<void>? gate;
 
     AnonymousAuthGate make() => AnonymousAuthGate(
-          hasUser: () => signedIn,
-          signIn: () async {
-            signIns++;
-            await gate?.future;
-            final Object? e = error;
-            if (e != null) throw e;
-            signedIn = true;
-          },
-        );
+      hasUser: () => signedIn,
+      signIn: () async {
+        signIns++;
+        await gate?.future;
+        final Object? e = error;
+        if (e != null) throw e;
+        signedIn = true;
+      },
+    );
 
     setUp(() {
       signedIn = false;
@@ -85,24 +100,32 @@ void main() {
       expect(signedIn, isTrue);
     });
 
-    test('socket and timeout errors become network and timeout failures',
-        () async {
-      error = const SocketException('x');
-      await expectLater(
-        make().ensureSignedIn(),
-        throwsA(
-          isA<InvoiceFailure>()
-              .having((InvoiceFailure f) => f.kind, 'kind', InvoiceErrorKind.network),
-        ),
-      );
-      error = TimeoutException('x');
-      await expectLater(
-        make().ensureSignedIn(),
-        throwsA(
-          isA<InvoiceFailure>()
-              .having((InvoiceFailure f) => f.kind, 'kind', InvoiceErrorKind.timeout),
-        ),
-      );
-    });
+    test(
+      'socket and timeout errors become network and timeout failures',
+      () async {
+        error = const SocketException('x');
+        await expectLater(
+          make().ensureSignedIn(),
+          throwsA(
+            isA<InvoiceFailure>().having(
+              (InvoiceFailure f) => f.kind,
+              'kind',
+              InvoiceErrorKind.network,
+            ),
+          ),
+        );
+        error = TimeoutException('x');
+        await expectLater(
+          make().ensureSignedIn(),
+          throwsA(
+            isA<InvoiceFailure>().having(
+              (InvoiceFailure f) => f.kind,
+              'kind',
+              InvoiceErrorKind.timeout,
+            ),
+          ),
+        );
+      },
+    );
   });
 }

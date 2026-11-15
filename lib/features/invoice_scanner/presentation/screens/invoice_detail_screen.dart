@@ -58,8 +58,9 @@ class InvoiceDetailScreen extends StatelessWidget {
             ? Center(child: Text(l10n.detailNothingToShow))
             : Center(
                 child: ConstrainedBox(
-                  constraints:
-                      const BoxConstraints(maxWidth: AppSizes.maxContentWidth),
+                  constraints: const BoxConstraints(
+                    maxWidth: AppSizes.maxContentWidth,
+                  ),
                   child: ListView(
                     padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                     children: <Widget>[
@@ -104,7 +105,9 @@ class _Row extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                style: text.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
             ),
             const SizedBox(width: AppSpacing.md),
@@ -180,8 +183,9 @@ class _LinesCard extends StatelessWidget {
     final ColorScheme scheme = Theme.of(context).colorScheme;
     final String locale = Localizations.localeOf(context).toString();
     final MoneyFormatter money = MoneyFormatter(locale);
-    final LocalizedNumberParser numbers =
-        LocalizedNumberParser.forLocale(locale);
+    final LocalizedNumberParser numbers = LocalizedNumberParser.forLocale(
+      locale,
+    );
 
     return Card(
       child: Padding(
@@ -197,7 +201,9 @@ class _LinesCard extends StatelessWidget {
             if (invoice.lineItems.isEmpty)
               Text(
                 l10n.detailNoLines,
-                style: text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                style: text.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
             for (final InvoiceLineItem item in invoice.lineItems)
               Padding(
@@ -212,8 +218,9 @@ class _LinesCard extends StatelessWidget {
                           numbers.localize(item.unitPrice.toString()),
                         )
                       : null,
-                  total:
-                      item.lineTotal == null ? null : money.format(item.lineTotal!),
+                  total: item.lineTotal == null
+                      ? null
+                      : money.format(item.lineTotal!),
                 ),
               ),
           ],
@@ -303,7 +310,8 @@ class _TotalsCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             if (subtotal != null)
               _Row(label: l10n.subtotalLabel, value: money.format(subtotal)),
-            if (tax != null) _Row(label: l10n.taxLabel, value: money.format(tax)),
+            if (tax != null)
+              _Row(label: l10n.taxLabel, value: money.format(tax)),
             _Row(
               label: l10n.totalLabel,
               value: total == null ? l10n.recentNoTotal : money.format(total),

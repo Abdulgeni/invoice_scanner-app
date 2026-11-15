@@ -12,35 +12,36 @@ import '../../../../support/pump_app.dart';
 late DeleteOutcome outcome;
 late int deletes;
 
-InvoiceRecord savedRecord(Invoice invoice) => InvoiceRecord.queued(
-      id: 'x',
-      imagePaths: <String>['managed/x_0.jpg'],
-      now: testT0,
-    )
+InvoiceRecord savedRecord(Invoice invoice) =>
+    InvoiceRecord.queued(
+          id: 'x',
+          imagePaths: <String>['managed/x_0.jpg'],
+          now: testT0,
+        )
         .markExtracting(testT0)
         .markNeedsReview(invoice, testT0)
         .markSaved(invoice, testT0);
 
 Widget detail(Invoice invoice) => InvoiceDetailScreen(
-      record: savedRecord(invoice),
-      onDelete: () async {
-        deletes++;
-        return outcome;
-      },
-    );
+  record: savedRecord(invoice),
+  onDelete: () async {
+    deletes++;
+    return outcome;
+  },
+);
 
 Widget host(Invoice invoice) => Builder(
-      builder: (BuildContext context) => Scaffold(
-        body: Center(
-          child: ElevatedButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => detail(invoice)),
-            ),
-            child: const Text('open'),
-          ),
-        ),
+  builder: (BuildContext context) => Scaffold(
+    body: Center(
+      child: ElevatedButton(
+        onPressed: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: (_) => detail(invoice))),
+        child: const Text('open'),
       ),
-    );
+    ),
+  ),
+);
 
 Future<void> open(WidgetTester tester, Invoice invoice) async {
   await pumpLocalized(tester, host(invoice));
@@ -94,8 +95,9 @@ void main() {
       expect(find.byType(InvoiceDetailScreen), findsOneWidget);
     });
 
-    testWidgets('confirming deletes, leaves the screen and says so',
-        (tester) async {
+    testWidgets('confirming deletes, leaves the screen and says so', (
+      tester,
+    ) async {
       await open(tester, sampleInvoice());
       await tester.tap(find.byTooltip('Delete this invoice?'));
       await tester.pumpAndSettle();
@@ -106,8 +108,9 @@ void main() {
       expect(find.text('Invoice deleted'), findsOneWidget);
     });
 
-    testWidgets('an invoice that is already gone counts as deleted',
-        (tester) async {
+    testWidgets('an invoice that is already gone counts as deleted', (
+      tester,
+    ) async {
       outcome = DeleteOutcome.notFound;
       await open(tester, sampleInvoice());
       await tester.tap(find.byTooltip('Delete this invoice?'));

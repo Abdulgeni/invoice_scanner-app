@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-
 import 'package:invoice_scanner/core/async/cancellation_token.dart';
 import 'package:invoice_scanner/features/invoice_scanner/data/datasources/connectivity_plus_monitor.dart';
 import 'package:invoice_scanner/features/invoice_scanner/data/datasources/document_scanner_datasource.dart';
@@ -96,7 +95,8 @@ Future<AppScope> createAppScope({
   );
   final ExtractInvoice extract = ExtractInvoice(
     repository: repository,
-    extractor: extractorBuilder?.call(newId) ?? DemoInvoiceExtractor(newId: newId),
+    extractor:
+        extractorBuilder?.call(newId) ?? DemoInvoiceExtractor(newId: newId),
     imageStore: store,
     analytics: analytics,
     clock: clock,
@@ -125,9 +125,10 @@ Future<AppScope> createAppScope({
     connectivity: monitor,
     fallbackCurrency: () => fallbackCurrency,
   );
-  final ExtractionQueueRunner runner =
-      ExtractionQueueRunner(pass: queue.runOnce, connectivity: monitor)
-        ..start();
+  final ExtractionQueueRunner runner = ExtractionQueueRunner(
+    pass: queue.runOnce,
+    connectivity: monitor,
+  )..start();
 
   return AppScope(
     createBloc: () => InvoiceScannerBloc(
@@ -173,9 +174,9 @@ class DemoInvoiceExtractor implements InvoiceExtractor {
   }) async {
     await cancel.race(Future<void>.delayed(delay));
     Money amount(String whole) => Money.tryFromDecimalExact(
-          DecimalValue.tryParse(whole)!,
-          fallbackCurrency,
-        )!;
+      DecimalValue.tryParse(whole)!,
+      fallbackCurrency,
+    )!;
     return Invoice(
       currency: fallbackCurrency,
       currencyAssumed: true,

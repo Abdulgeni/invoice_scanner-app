@@ -13,12 +13,17 @@ final class AppConfig {
     this.useDeveloperApi = const bool.fromEnvironment('USE_DEVELOPER_API'),
     this.aiLocation = const String.fromEnvironment('AI_LOCATION'),
     this.forceAppCheckDebug = const bool.fromEnvironment('APP_CHECK_DEBUG'),
-    this.limitedUseAppCheckTokens =
-        const bool.fromEnvironment('LIMITED_USE_APP_CHECK_TOKENS'),
-    this.dailyExtractionCap =
-        const int.fromEnvironment('DAILY_EXTRACTION_CAP', defaultValue: 60),
-    this.fallbackCurrencyCode =
-        const String.fromEnvironment('FALLBACK_CURRENCY', defaultValue: 'USD'),
+    this.limitedUseAppCheckTokens = const bool.fromEnvironment(
+      'LIMITED_USE_APP_CHECK_TOKENS',
+    ),
+    this.dailyExtractionCap = const int.fromEnvironment(
+      'DAILY_EXTRACTION_CAP',
+      defaultValue: 60,
+    ),
+    this.fallbackCurrencyCode = const String.fromEnvironment(
+      'FALLBACK_CURRENCY',
+      defaultValue: 'USD',
+    ),
   });
 
   /// Skip Firebase entirely and read invoices with sample data.
@@ -45,10 +50,10 @@ final class AppConfig {
       Currency.tryParse(fallbackCurrencyCode) ?? Currency.usd;
 
   bool get useAppCheckDebugProvider => debugProviderFor(
-        debugMode: kDebugMode,
-        releaseMode: kReleaseMode,
-        forced: forceAppCheckDebug,
-      );
+    debugMode: kDebugMode,
+    releaseMode: kReleaseMode,
+    forced: forceAppCheckDebug,
+  );
 
   /// Release builds always attest with Play Integrity. The debug provider is
   /// for debug builds, and for profile builds when explicitly forced.

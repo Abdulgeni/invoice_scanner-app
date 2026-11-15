@@ -52,9 +52,7 @@ class _PrivacySheet extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  ExcludeSemantics(
-                    child: Icon(icon, color: scheme.primary),
-                  ),
+                  ExcludeSemantics(child: Icon(icon, color: scheme.primary)),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Text(

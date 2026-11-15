@@ -20,12 +20,15 @@ void main() {
 
   test('counts up to the cap and then refuses without recording', () async {
     final DailyUsageCounter c = make();
-    expect(<bool>[
-      await c.tryConsume(3),
-      await c.tryConsume(3),
-      await c.tryConsume(3),
-      await c.tryConsume(3),
-    ], <bool>[true, true, true, false]);
+    expect(
+      <bool>[
+        await c.tryConsume(3),
+        await c.tryConsume(3),
+        await c.tryConsume(3),
+        await c.tryConsume(3),
+      ],
+      <bool>[true, true, true, false],
+    );
     expect(await c.countToday(), 3);
   });
 
@@ -96,9 +99,9 @@ void main() {
 
   test('parallel callers are serialized: exactly the cap succeeds', () async {
     final DailyUsageCounter c = make();
-    final List<bool> results = await Future.wait<bool>(
-      <Future<bool>>[for (int i = 0; i < 12; i++) c.tryConsume(5)],
-    );
+    final List<bool> results = await Future.wait<bool>(<Future<bool>>[
+      for (int i = 0; i < 12; i++) c.tryConsume(5),
+    ]);
     expect(results.where((bool ok) => ok), hasLength(5));
     expect(await c.countToday(), 5);
   });
@@ -117,8 +120,11 @@ void main() {
   test('no temporary file is left behind', () async {
     await make().tryConsume(3);
     expect(
-      temp.listSync().whereType<File>().map((File f) => f.path).where(
-          (String p) => p.endsWith('.tmp')),
+      temp
+          .listSync()
+          .whereType<File>()
+          .map((File f) => f.path)
+          .where((String p) => p.endsWith('.tmp')),
       isEmpty,
     );
   });

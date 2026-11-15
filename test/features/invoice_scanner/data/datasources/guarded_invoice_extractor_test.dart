@@ -31,10 +31,10 @@ class RecordingExtractor implements InvoiceExtractor {
 }
 
 Matcher failure(InvoiceErrorKind kind, String code) => throwsA(
-      isA<InvoiceFailure>()
-          .having((InvoiceFailure f) => f.kind, 'kind', kind)
-          .having((InvoiceFailure f) => f.debugCode, 'debugCode', code),
-    );
+  isA<InvoiceFailure>()
+      .having((InvoiceFailure f) => f.kind, 'kind', kind)
+      .having((InvoiceFailure f) => f.debugCode, 'debugCode', code),
+);
 
 void main() {
   late Directory temp;
@@ -56,10 +56,10 @@ void main() {
   }
 
   Future<Invoice> run(InvoiceExtractor e) => e.extract(
-        imagePaths: const <String>['p.jpg'],
-        fallbackCurrency: Currency.usd,
-        cancel: cancel,
-      );
+    imagePaths: const <String>['p.jpg'],
+    fallbackCurrency: Currency.usd,
+    cancel: cancel,
+  );
 
   setUp(() {
     temp = Directory.systemTemp.createTempSync('guard_test');
