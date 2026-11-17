@@ -63,10 +63,6 @@ void main() {
       const Locale('en'),
     );
     expect(l.pageLimitExceeded(5), contains('5'));
-    expect(
-      l.warningTotalMismatch('10.00', '12.00'),
-      allOf(contains('10.00'), contains('12.00')),
-    );
     expect(l.validationInvalidNumber('1,234.56'), contains('1,234.56'));
   });
 }

@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:invoice_scanner/features/invoice_scanner/data/db/app_database.dart';
 import 'package:invoice_scanner/features/invoice_scanner/data/repositories/drift_invoice_repository.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/entities/invoice_record.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/failures/debug_codes.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/failures/invoice_failure.dart';
 
 import '../../../../support/fakes.dart';
@@ -357,7 +358,7 @@ void main() {
           isA<InvoiceFailure>().having(
             (InvoiceFailure f) => f.debugCode,
             'debugCode',
-            PersistenceDebugCodes.rowCorrupt,
+            DebugCodes.rowCorrupt,
           ),
         );
         await expectLater(repo.get(id), corrupt, reason: id);

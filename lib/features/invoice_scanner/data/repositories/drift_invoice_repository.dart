@@ -7,13 +7,9 @@ import 'package:invoice_scanner/features/invoice_scanner/data/db/app_database.da
 import 'package:invoice_scanner/features/invoice_scanner/data/db/invoice_codec.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/entities/invoice.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/entities/invoice_record.dart';
+import 'package:invoice_scanner/features/invoice_scanner/domain/failures/debug_codes.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/failures/invoice_failure.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/repositories/invoice_repository.dart';
-
-abstract final class PersistenceDebugCodes {
-  static const String rowCorrupt = 'row_corrupt';
-}
-
 final class _CorruptRow implements Exception {
   const _CorruptRow();
 }
@@ -136,7 +132,7 @@ class DriftInvoiceRepository implements InvoiceRepository {
     } on _CorruptRow {
       throw const InvoiceFailure(
         InvoiceErrorKind.unknown,
-        debugCode: PersistenceDebugCodes.rowCorrupt,
+        debugCode: DebugCodes.rowCorrupt,
       );
     }
   }

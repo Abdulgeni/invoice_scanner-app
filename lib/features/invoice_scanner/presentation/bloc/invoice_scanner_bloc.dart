@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:invoice_scanner/core/async/cancellation_token.dart';
 import 'package:invoice_scanner/core/util/clock.dart';
-import 'package:invoice_scanner/features/invoice_scanner/data/repositories/drift_invoice_repository.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/entities/invoice.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/entities/invoice_edits.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/entities/invoice_record.dart';
@@ -187,7 +186,7 @@ class InvoiceScannerBloc
       DebugCodes.cameraPermissionDenied =>
         CaptureFailureReason.cameraPermissionDenied,
       DebugCodes.scannerUnavailable => CaptureFailureReason.scannerUnavailable,
-      PersistenceDebugCodes.rowCorrupt =>
+      DebugCodes.rowCorrupt =>
         CaptureFailureReason.storageUnavailable,
       _ => CaptureFailureReason.unknown,
     };

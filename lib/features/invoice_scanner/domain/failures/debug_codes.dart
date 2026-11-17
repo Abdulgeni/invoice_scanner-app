@@ -8,5 +8,6 @@ abstract final class DebugCodes {
   static const String ioFailed = 'io_failed';
   static const String imagesMissing = 'images_missing';
   static const String duplicateId = 'duplicate_id';
+  static const String rowCorrupt = 'row_corrupt';
   static const String unexpected = 'unexpected';
 }
