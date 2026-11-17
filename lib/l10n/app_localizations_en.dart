@@ -12,15 +12,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Invoice Scanner';
 
   @override
-  String get homeLastInvoiceTotal => 'Last invoice total';
-
-  @override
-  String get scanAction => 'Scan';
-
-  @override
-  String get scanInvoiceSemantics => 'Scan invoice';
-
-  @override
   String get importFromGallery => 'Import from gallery';
 
   @override
@@ -46,9 +37,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stageValidating => 'Checking totals';
-
-  @override
-  String get errorTitle => 'Couldn\'t read this invoice';
 
   @override
   String get errorNetwork =>
@@ -91,11 +79,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String pageLimitExceeded(int max) {
     return 'Invoices can have up to $max pages. Remove some pages and try again.';
-  }
-
-  @override
-  String warningTotalMismatch(String lineSum, String total) {
-    return 'The line items add up to $lineSum, but the total says $total.';
   }
 
   @override

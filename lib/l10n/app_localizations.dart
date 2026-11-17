@@ -100,24 +100,6 @@ abstract class AppLocalizations {
   /// **'Invoice Scanner'**
   String get appTitle;
 
-  /// No description provided for @homeLastInvoiceTotal.
-  ///
-  /// In en, this message translates to:
-  /// **'Last invoice total'**
-  String get homeLastInvoiceTotal;
-
-  /// No description provided for @scanAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Scan'**
-  String get scanAction;
-
-  /// No description provided for @scanInvoiceSemantics.
-  ///
-  /// In en, this message translates to:
-  /// **'Scan invoice'**
-  String get scanInvoiceSemantics;
-
   /// No description provided for @importFromGallery.
   ///
   /// In en, this message translates to:
@@ -171,12 +153,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Checking totals'**
   String get stageValidating;
-
-  /// No description provided for @errorTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t read this invoice'**
-  String get errorTitle;
 
   /// Module 6 will replace this with an offline-queue promise once that queue ships.
   ///
@@ -243,12 +219,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invoices can have up to {max} pages. Remove some pages and try again.'**
   String pageLimitExceeded(int max);
-
-  /// No description provided for @warningTotalMismatch.
-  ///
-  /// In en, this message translates to:
-  /// **'The line items add up to {lineSum}, but the total says {total}.'**
-  String warningTotalMismatch(String lineSum, String total);
 
   /// No description provided for @validationInvalidNumber.
   ///
