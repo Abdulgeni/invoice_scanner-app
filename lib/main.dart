@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:invoice_scanner/app/app_composition.dart';
+import 'package:invoice_scanner/core/error/crash_reporter.dart';
 import 'package:invoice_scanner/app/app_config.dart';
 import 'package:invoice_scanner/app/firebase_bootstrap.dart';
 import 'package:invoice_scanner/core/theme/app_theme.dart';
@@ -18,6 +19,7 @@ import 'package:path_provider/path_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  installErrorHandlers(const NoopCrashReporter());
   const AppConfig config = AppConfig();
 
   InvoiceExtractor Function(String Function() newId)? extractorBuilder;
