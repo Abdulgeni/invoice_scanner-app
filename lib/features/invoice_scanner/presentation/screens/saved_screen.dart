@@ -85,7 +85,8 @@ class _SavedScreenState extends State<SavedScreen>
             ),
             child: Padding(
               padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-              child: Column(
+              child: SingleChildScrollView(
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   ExcludeSemantics(
@@ -138,6 +139,7 @@ class _SavedScreenState extends State<SavedScreen>
                     child: Text(l10n.doneAction),
                   ),
                 ],
+              ),
               ),
             ),
           ),

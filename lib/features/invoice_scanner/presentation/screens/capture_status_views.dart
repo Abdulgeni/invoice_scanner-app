@@ -176,6 +176,7 @@ class CaptureFailureView extends StatelessWidget {
                 ],
               ),
             ),
+              ),
           ),
         ),
       ),
