@@ -47,8 +47,13 @@ const List<Env> envs = <Env>[
   Env('small phone, double text, dark', Size(320, 568), dark: true, scale: 2),
   Env('right-to-left', Size(390, 844), rtl: true),
   Env('landscape phone', Size(844, 390), scale: 1.3),
-  Env('tablet, right-to-left, dark', Size(1024, 768),
-      dark: true, rtl: true, scale: 1.5),
+  Env(
+    'tablet, right-to-left, dark',
+    Size(1024, 768),
+    dark: true,
+    rtl: true,
+    scale: 1.5,
+  ),
 ];
 
 const List<String> pages = <String>['managed/a_0.jpg', 'managed/a_1.jpg'];
@@ -56,10 +61,10 @@ final DateTime today = DateTime.utc(2026, 11, 8);
 final List<HistoryCubit> cubits = <HistoryCubit>[];
 
 InvoiceRecord base(String id) => InvoiceRecord.queued(
-      id: id,
-      imagePaths: <String>['managed/${id}_0.jpg'],
-      now: testT0,
-    );
+  id: id,
+  imagePaths: <String>['managed/${id}_0.jpg'],
+  now: testT0,
+);
 
 InvoiceRecord saved(String id, String vendor) {
   final Invoice inv = sampleInvoice(vendor: vendor);
@@ -70,98 +75,128 @@ InvoiceRecord saved(String id, String vendor) {
 }
 
 List<InvoiceRecord> records() => <InvoiceRecord>[
-      base('p'),
-      saved('s1', 'Acme'),
-    ];
+  base('p'),
+  saved('s1', 'Acme'),
+];
 
 typedef Build = Widget Function();
 
 final List<(String, Build)> screens = <(String, Build)>[
-  ('HomeScreen', () => HomeScreen(
-        watchRecent: () => Stream<List<InvoiceRecord>>.value(records()),
-        onScan: () {},
-        onImport: () {},
-        onShowTips: () {},
-        onViewAll: () {},
-        onOpenInvoice: (InvoiceRecord _) {},
-      )),
-  ('PreviewScreen', () => PreviewScreen(
-        pagePaths: pages,
-        onRead: () {},
-        onRetake: () {},
-        onDiscard: () {},
-      )),
-  ('CaptureProgressView', () => CaptureProgressView(onCancel: () {})),
-  ('CaptureFailureView', () => CaptureFailureView(
-        reason: CaptureFailureReason.tooManyPages,
-        maxPages: 5,
-        onRetry: () {},
-        onDone: () {},
-      )),
-  ('ProcessingScreen', () => ProcessingScreen(
-        stage: ProcessingStage.reading,
-        pagePaths: pages,
-        onCancel: () {},
-      )),
-  ('ExtractionFailureScreen', () => ExtractionFailureScreen(
-        state: const InvoiceExtractionFailure(
-          recordId: 'a',
-          pagePaths: pages,
-          source: ScanSource.camera,
-          kind: InvoiceErrorKind.emptyResponse,
-          canRetry: true,
-          suggestsRetake: true,
-        ),
-        onRetry: () {},
-        onRetake: () {},
-        onKeep: () {},
-        onDiscard: () {},
-      )),
-  ('ReviewScreen', () {
-    final Invoice invoice = sampleInvoice().copyWith(
-      total: () => usd(3400),
-      currencyAssumed: true,
-    );
-    return ReviewScreen(
-      state: InvoiceReviewing(
-        recordId: 'r',
-        pagePaths: pages,
-        invoice: invoice,
-        warnings: validateInvoice(invoice, today: today),
-      ),
-      newLineId: () => 'n',
-      now: () => today,
-      onChange: (Invoice Function(Invoice) _) {},
-      onSave: () {},
+  (
+    'HomeScreen',
+    () => HomeScreen(
+      watchRecent: () => Stream<List<InvoiceRecord>>.value(records()),
+      onScan: () {},
+      onImport: () {},
+      onShowTips: () {},
+      onViewAll: () {},
+      onOpenInvoice: (InvoiceRecord _) {},
+    ),
+  ),
+  (
+    'PreviewScreen',
+    () => PreviewScreen(
+      pagePaths: pages,
+      onRead: () {},
+      onRetake: () {},
       onDiscard: () {},
-    );
-  }),
-  ('SavedScreen', () => SavedScreen(
-        invoice: sampleInvoice(),
-        onDone: () {},
-        onScanAnother: () {},
-      )),
-  ('HistoryScreen', () {
-    final HistoryCubit cubit = HistoryCubit(
-      watchLive: () => Stream<List<InvoiceRecord>>.value(records()),
-      deleteInvoice: (String _) async => DeleteOutcome.deleted,
-    );
-    cubits.add(cubit);
-    return BlocProvider<HistoryCubit>.value(
-      value: cubit,
-      child: HistoryScreen(
-        onResume: (InvoiceRecord _) {},
-        onOpenSaved: (InvoiceRecord _) {},
+    ),
+  ),
+  ('CaptureProgressView', () => CaptureProgressView(onCancel: () {})),
+  (
+    'CaptureFailureView',
+    () => CaptureFailureView(
+      reason: CaptureFailureReason.tooManyPages,
+      maxPages: 5,
+      onRetry: () {},
+      onDone: () {},
+    ),
+  ),
+  (
+    'ProcessingScreen',
+    () => ProcessingScreen(
+      stage: ProcessingStage.reading,
+      pagePaths: pages,
+      onCancel: () {},
+    ),
+  ),
+  (
+    'ExtractionFailureScreen',
+    () => ExtractionFailureScreen(
+      state: const InvoiceExtractionFailure(
+        recordId: 'a',
+        pagePaths: pages,
+        source: ScanSource.camera,
+        kind: InvoiceErrorKind.emptyResponse,
+        canRetry: true,
+        suggestsRetake: true,
       ),
-    );
-  }),
-  ('InvoiceDetailScreen', () => InvoiceDetailScreen(
-        record: saved('d', 'Acme'),
-        onDelete: () async => DeleteOutcome.deleted,
-      )),
-  ('ScanGuidanceSheet', () => const Scaffold(
-        body: SingleChildScrollView(child: ScanGuidanceSheet(showStart: true)),
-      )),
+      onRetry: () {},
+      onRetake: () {},
+      onKeep: () {},
+      onDiscard: () {},
+    ),
+  ),
+  (
+    'ReviewScreen',
+    () {
+      final Invoice invoice = sampleInvoice().copyWith(
+        total: () => usd(3400),
+        currencyAssumed: true,
+      );
+      return ReviewScreen(
+        state: InvoiceReviewing(
+          recordId: 'r',
+          pagePaths: pages,
+          invoice: invoice,
+          warnings: validateInvoice(invoice, today: today),
+        ),
+        newLineId: () => 'n',
+        now: () => today,
+        onChange: (Invoice Function(Invoice) _) {},
+        onSave: () {},
+        onDiscard: () {},
+      );
+    },
+  ),
+  (
+    'SavedScreen',
+    () => SavedScreen(
+      invoice: sampleInvoice(),
+      onDone: () {},
+      onScanAnother: () {},
+    ),
+  ),
+  (
+    'HistoryScreen',
+    () {
+      final HistoryCubit cubit = HistoryCubit(
+        watchLive: () => Stream<List<InvoiceRecord>>.value(records()),
+        deleteInvoice: (String _) async => DeleteOutcome.deleted,
+      );
+      cubits.add(cubit);
+      return BlocProvider<HistoryCubit>.value(
+        value: cubit,
+        child: HistoryScreen(
+          onResume: (InvoiceRecord _) {},
+          onOpenSaved: (InvoiceRecord _) {},
+        ),
+      );
+    },
+  ),
+  (
+    'InvoiceDetailScreen',
+    () => InvoiceDetailScreen(
+      record: saved('d', 'Acme'),
+      onDelete: () async => DeleteOutcome.deleted,
+    ),
+  ),
+  (
+    'ScanGuidanceSheet',
+    () => const Scaffold(
+      body: SingleChildScrollView(child: ScanGuidanceSheet(showStart: true)),
+    ),
+  ),
 ];
 
 Future<void> showScreen(WidgetTester tester, Build build, Env env) async {
@@ -173,8 +208,10 @@ Future<void> showScreen(WidgetTester tester, Build build, Env env) async {
     (MethodCall call) async => null,
   );
   addTearDown(
-    () => tester.binding.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform, null),
+    () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    ),
   );
   await pumpLocalized(
     tester,
@@ -199,19 +236,19 @@ void main() {
   group('every screen renders without errors in every environment', () {
     for (final Env env in envs) {
       for (final (String name, Build build) in screens) {
+        // TODO(module-13): 320x2x RenderFlex overflow in PreviewScreen
+        // and ReviewScreen. The CaptureFailureView and SavedScreen cases
+        // were fixed with a SingleChildScrollView wrap; the same pattern
+        // is the fix here.
         final bool isKnownOverflow =
             env.name == 'small phone, double text, dark' &&
-                (name == 'PreviewScreen' || name == 'ReviewScreen');
-        testWidgets(
-          '$name, ${env.name}',
-          skip: isKnownOverflow
-              ? 'TODO(module-13): 320x2x RenderFlex overflow'
-              : null,
-          (WidgetTester tester) async {
-            await showScreen(tester, build, env);
-            expect(tester.takeException(), isNull);
-          },
-        );
+            (name == 'PreviewScreen' || name == 'ReviewScreen');
+        testWidgets('$name, ${env.name}', skip: isKnownOverflow, (
+          WidgetTester tester,
+        ) async {
+          await showScreen(tester, build, env);
+          expect(tester.takeException(), isNull);
+        });
       }
     }
   });

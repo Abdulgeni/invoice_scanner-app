@@ -26,7 +26,10 @@ Future<void> pumpLocalized(
           child: child!,
         );
         if (textDirection != null) {
-          content = Directionality(textDirection: textDirection, child: content);
+          content = Directionality(
+            textDirection: textDirection,
+            child: content,
+          );
         }
         return content;
       },

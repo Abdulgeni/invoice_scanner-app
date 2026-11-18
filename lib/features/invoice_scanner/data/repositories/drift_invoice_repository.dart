@@ -10,6 +10,7 @@ import 'package:invoice_scanner/features/invoice_scanner/domain/entities/invoice
 import 'package:invoice_scanner/features/invoice_scanner/domain/failures/debug_codes.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/failures/invoice_failure.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/repositories/invoice_repository.dart';
+
 final class _CorruptRow implements Exception {
   const _CorruptRow();
 }

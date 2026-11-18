@@ -124,59 +124,64 @@ class CaptureFailureView extends StatelessWidget {
               padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
               child: SingleChildScrollView(
                 child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  ExcludeSemantics(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: scheme.errorContainer,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-                        child: Icon(
-                          Icons.error_outline,
-                          size: AppSizes.iconLg,
-                          color: scheme.onErrorContainer,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    ExcludeSemantics(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: scheme.errorContainer,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsetsDirectional.all(
+                            AppSpacing.lg,
+                          ),
+                          child: Icon(
+                            Icons.error_outline,
+                            size: AppSizes.iconLg,
+                            color: scheme.onErrorContainer,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Semantics(
-                    header: true,
-                    child: Text(l10n.captureErrorTitle, style: text.titleLarge),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    captureErrorMessage(l10n, reason, maxPages: maxPages),
-                    textAlign: TextAlign.center,
-                    style: text.bodyMedium,
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  FilledButton(
-                    onPressed: onRetry,
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(
-                        AppSizes.minTouchTarget,
+                    const SizedBox(height: AppSpacing.lg),
+                    Semantics(
+                      header: true,
+                      child: Text(
+                        l10n.captureErrorTitle,
+                        style: text.titleLarge,
                       ),
                     ),
-                    child: Text(l10n.retryAction),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  TextButton(
-                    onPressed: onDone,
-                    style: TextButton.styleFrom(
-                      minimumSize: const Size.fromHeight(
-                        AppSizes.minTouchTarget,
-                      ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      captureErrorMessage(l10n, reason, maxPages: maxPages),
+                      textAlign: TextAlign.center,
+                      style: text.bodyMedium,
                     ),
-                    child: Text(l10n.doneAction),
-                  ),
-                ],
+                    const SizedBox(height: AppSpacing.xl),
+                    FilledButton(
+                      onPressed: onRetry,
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(
+                          AppSizes.minTouchTarget,
+                        ),
+                      ),
+                      child: Text(l10n.retryAction),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    TextButton(
+                      onPressed: onDone,
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size.fromHeight(
+                          AppSizes.minTouchTarget,
+                        ),
+                      ),
+                      child: Text(l10n.doneAction),
+                    ),
+                  ],
+                ),
               ),
             ),
-              ),
           ),
         ),
       ),

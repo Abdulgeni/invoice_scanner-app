@@ -186,8 +186,7 @@ class InvoiceScannerBloc
       DebugCodes.cameraPermissionDenied =>
         CaptureFailureReason.cameraPermissionDenied,
       DebugCodes.scannerUnavailable => CaptureFailureReason.scannerUnavailable,
-      DebugCodes.rowCorrupt =>
-        CaptureFailureReason.storageUnavailable,
+      DebugCodes.rowCorrupt => CaptureFailureReason.storageUnavailable,
       _ => CaptureFailureReason.unknown,
     };
   }

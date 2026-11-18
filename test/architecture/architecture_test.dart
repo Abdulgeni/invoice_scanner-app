@@ -20,22 +20,20 @@ String norm(String path) => path.replaceAll('\\', '/');
 List<File> dartFiles(String dir) {
   final Directory d = Directory(dir);
   if (!d.existsSync()) return <File>[];
-  return d
-      .listSync(recursive: true)
-      .whereType<File>()
-      .where((File f) {
-        final String p = norm(f.path);
-        return p.endsWith('.dart') && !p.endsWith('.g.dart');
-      })
-      .toList();
+  return d.listSync(recursive: true).whereType<File>().where((File f) {
+    final String p = norm(f.path);
+    return p.endsWith('.dart') && !p.endsWith('.g.dart');
+  }).toList();
 }
 
 String stripComments(String source) => source
     .replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '')
     .replaceAll(RegExp(r'//.*'), '');
 
-final RegExp _import =
-    RegExp(r'''^\s*import\s+['"]([^'"]+)['"]''', multiLine: true);
+final RegExp _import = RegExp(
+  r'''^\s*import\s+['"]([^'"]+)['"]''',
+  multiLine: true,
+);
 
 Iterable<String> importsOf(File f) => _import
     .allMatches(f.readAsStringSync())
@@ -107,10 +105,7 @@ void main() {
         'package:invoice_scanner/app/',
       ];
       expectNone(
-        importViolations(
-          domain,
-          (String i) => forbidden.any(i.contains),
-        ),
+        importViolations(domain, (String i) => forbidden.any(i.contains)),
       );
     });
 
@@ -207,14 +202,12 @@ void main() {
     });
 
     test('Drift is imported only inside the data layer', () {
-      expectNone(
-        <String>[
-          for (final File f in nonL10nLib)
-            if (importsOf(f).any((String i) => i.startsWith('package:drift')) &&
-                !norm(f.path).startsWith('$dataDir/'))
-              norm(f.path),
-        ],
-      );
+      expectNone(<String>[
+        for (final File f in nonL10nLib)
+          if (importsOf(f).any((String i) => i.startsWith('package:drift')) &&
+              !norm(f.path).startsWith('$dataDir/'))
+            norm(f.path),
+      ]);
     });
   });
 
@@ -232,8 +225,9 @@ void main() {
         final List<String> lines = f.readAsStringSync().split('\n');
         for (int i = 0; i < lines.length; i++) {
           if (!lines[i].contains('debugPrint(')) continue;
-          final String window =
-              lines.sublist(math.max(0, i - 3), i + 1).join('\n');
+          final String window = lines
+              .sublist(math.max(0, i - 3), i + 1)
+              .join('\n');
           if (!debugPrintAllowed.contains(norm(f.path)) ||
               !window.contains('kDebugMode')) {
             bad.add('${norm(f.path)}:${i + 1}');
@@ -295,15 +289,15 @@ void main() {
     });
 
     test('every ARB message is used somewhere', () {
-      final Map<String, dynamic> arb = jsonDecode(
-        File('lib/l10n/app_en.arb').readAsStringSync(),
-      ) as Map<String, dynamic>;
-      final String usage =
-          nonL10nLib.map((File f) => f.readAsStringSync()).join('\n');
+      final Map<String, dynamic> arb =
+          jsonDecode(File('lib/l10n/app_en.arb').readAsStringSync())
+              as Map<String, dynamic>;
+      final String usage = nonL10nLib
+          .map((File f) => f.readAsStringSync())
+          .join('\n');
       final List<String> unused = <String>[
         for (final String key in arb.keys)
-          if (!key.startsWith('@') &&
-              !RegExp('\\.$key\\b').hasMatch(usage))
+          if (!key.startsWith('@') && !RegExp('\\.$key\\b').hasMatch(usage))
             key,
       ];
       expectNone(unused);

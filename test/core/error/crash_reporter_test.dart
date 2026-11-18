@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:invoice_scanner/core/error/crash_reporter.dart';
@@ -55,7 +54,9 @@ void main() {
   });
 
   test('a missing stack trace is tolerated', () {
-    FlutterError.onError!(const FlutterErrorDetails(exception: 'a plain string'));
+    FlutterError.onError!(
+      const FlutterErrorDetails(exception: 'a plain string'),
+    );
     expect(reporter.events.single, ('String', false));
   });
 

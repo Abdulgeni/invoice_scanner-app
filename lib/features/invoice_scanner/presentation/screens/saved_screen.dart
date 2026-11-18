@@ -87,59 +87,59 @@ class _SavedScreenState extends State<SavedScreen>
               padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
               child: SingleChildScrollView(
                 child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  ExcludeSemantics(
-                    child: RepaintBoundary(
-                      child: CustomPaint(
-                        size: const Size.square(AppSizes.checkBadge),
-                        painter: _CheckPainter(
-                          progress: _controller,
-                          badge: scheme.primaryContainer,
-                          stroke: scheme.onPrimaryContainer,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    ExcludeSemantics(
+                      child: RepaintBoundary(
+                        child: CustomPaint(
+                          size: const Size.square(AppSizes.checkBadge),
+                          painter: _CheckPainter(
+                            progress: _controller,
+                            badge: scheme.primaryContainer,
+                            stroke: scheme.onPrimaryContainer,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  Semantics(
-                    liveRegion: true,
-                    header: true,
-                    child: Text(l10n.savedTitle, style: text.headlineSmall),
-                  ),
-                  if (summary != null) ...<Widget>[
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      summary,
-                      textAlign: TextAlign.center,
-                      style: text.bodyLarge?.copyWith(
-                        color: scheme.onSurfaceVariant,
+                    const SizedBox(height: AppSpacing.xl),
+                    Semantics(
+                      liveRegion: true,
+                      header: true,
+                      child: Text(l10n.savedTitle, style: text.headlineSmall),
+                    ),
+                    if (summary != null) ...<Widget>[
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        summary,
+                        textAlign: TextAlign.center,
+                        style: text.bodyLarge?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
+                    ],
+                    const SizedBox(height: AppSpacing.xxl),
+                    FilledButton.icon(
+                      onPressed: widget.onScanAnother,
+                      icon: const Icon(Icons.document_scanner_outlined),
+                      label: Text(l10n.savedScanAnother),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(
+                          AppSizes.minTouchTarget,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    TextButton(
+                      onPressed: widget.onDone,
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size.fromHeight(
+                          AppSizes.minTouchTarget,
+                        ),
+                      ),
+                      child: Text(l10n.doneAction),
                     ),
                   ],
-                  const SizedBox(height: AppSpacing.xxl),
-                  FilledButton.icon(
-                    onPressed: widget.onScanAnother,
-                    icon: const Icon(Icons.document_scanner_outlined),
-                    label: Text(l10n.savedScanAnother),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(
-                        AppSizes.minTouchTarget,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  TextButton(
-                    onPressed: widget.onDone,
-                    style: TextButton.styleFrom(
-                      minimumSize: const Size.fromHeight(
-                        AppSizes.minTouchTarget,
-                      ),
-                    ),
-                    child: Text(l10n.doneAction),
-                  ),
-                ],
-              ),
+                ),
               ),
             ),
           ),
