@@ -1,4 +1,4 @@
-import 'dart:ui' show PlatformDispatcher;
+import 'dart:ui' show ErrorCallback, PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
 

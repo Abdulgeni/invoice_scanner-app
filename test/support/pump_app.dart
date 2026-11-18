@@ -9,6 +9,7 @@ Future<void> pumpLocalized(
   bool reduceMotion = false,
   double textScale = 1,
   ThemeData? theme,
+  TextDirection? textDirection,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -17,13 +18,17 @@ Future<void> pumpLocalized(
       theme: theme ?? AppTheme.light,
       builder: (BuildContext context, Widget? child) {
         final MediaQueryData base = MediaQuery.of(context);
-        return MediaQuery(
+        Widget content = MediaQuery(
           data: base.copyWith(
             disableAnimations: reduceMotion || base.disableAnimations,
             textScaler: TextScaler.linear(textScale),
           ),
           child: child!,
         );
+        if (textDirection != null) {
+          content = Directionality(textDirection: textDirection, child: content);
+        }
+        return content;
       },
       home: home,
     ),

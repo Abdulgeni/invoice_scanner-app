@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:invoice_scanner/app/app_composition.dart';
-import 'package:invoice_scanner/core/error/crash_reporter.dart';
 import 'package:invoice_scanner/app/app_config.dart';
+
 import 'package:invoice_scanner/app/firebase_bootstrap.dart';
+import 'package:invoice_scanner/core/error/crash_reporter.dart';
 import 'package:invoice_scanner/core/theme/app_theme.dart';
+
 import 'package:invoice_scanner/features/invoice_scanner/data/usage/daily_usage_counter.dart';
 import 'package:invoice_scanner/features/invoice_scanner/domain/repositories/invoice_extractor.dart';
 import 'package:invoice_scanner/features/invoice_scanner/presentation/bloc/invoice_scanner_bloc.dart';

@@ -122,7 +122,8 @@ class CaptureFailureView extends StatelessWidget {
             ),
             child: Padding(
               padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-              child: Column(
+              child: SingleChildScrollView(
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   ExcludeSemantics(

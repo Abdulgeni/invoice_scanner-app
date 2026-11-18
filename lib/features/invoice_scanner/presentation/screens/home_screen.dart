@@ -82,12 +82,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: AppSpacing.xl),
                 FadeInUp(
                   delay: AppMotion.base,
-                  child: Semantics(
-                    header: true,
-                    child: Text(
-                      l10n.recentInvoicesTitle,
-                      style: text.titleMedium,
-                    ),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Semantics(
+                          header: true,
+                          child: Text(
+                            l10n.recentInvoicesTitle,
+                            style: text.titleMedium,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: widget.onViewAll,
+                        child: Text(l10n.historyViewAll),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
