@@ -1,61 +1,98 @@
-# Release checklist
+<div align="center">
 
-## Automated gates
-- [ ] `flutter analyze` has no issues
-- [ ] `flutter test` passes (all modules)
-- [ ] `RELEASE_CHECK=true flutter test test/platform` passes
-- [ ] `dart run build_runner build --delete-conflicting-outputs` is clean and
-      generated files are committed (or generated in CI)
+# 🚀 Release Checklist
 
-## Android
-- [ ] Application id is final (not `com.example`)
-- [ ] `targetSdk` is 36 or higher in the built bundle (Play rejects lower for
-      new apps and updates since 2026-08-31). Confirm in the AAB, not just
-      Gradle
-- [ ] Release signing configured; Play App Signing enrolled
-- [ ] SHA-256 of the upload key AND the Play app-signing key added to the
-      Firebase Android app
-- [ ] Native libraries 16 KB aligned; tested on a 16 KB emulator image
-- [ ] Edge-to-edge and landscape/tablet behavior checked at target 36
-- [ ] Permissions in the merged manifest: INTERNET, ACCESS_NETWORK_STATE,
-      CAMERA only (check `build/.../merged_manifest`)
-- [ ] `allowBackup="false"` in the merged manifest
-- [ ] Data safety form completed (images sent to an AI service)
-- [ ] Internal testing track run with real Play Integrity attestation
+**Every gate that must be green before shipping Invoice Scanner.**
 
-## iOS
-- [ ] Bundle id final; Team ID set; App Attest capability present
-- [ ] Entitlement environment is `production` in the release build
-- [ ] Built with the SDK version App Store Connect currently requires
-- [ ] UIScene lifecycle migration complete
-- [ ] Privacy nutrition label and export-compliance answers match reality
-- [ ] TestFlight build reads an invoice (App Attest works on a real device)
+</div>
 
-## Firebase and Google Cloud
-- [ ] App Check enforced for AI Logic (both platforms registered)
-- [ ] Authenticated-users mode on; Anonymous sign-in enabled
-- [ ] Per-user quota lowered; budget alerts set; monitoring on
-- [ ] API keys restricted to the app and to the needed APIs
-- [ ] Remote Config `model_name` set to a model that passed the accuracy test
-- [ ] Rollback plan: set `model_name` back to the previous value
-- [ ] Location chosen and confirmed with data-residency needs
+---
 
-## Legal and product
-- [ ] Privacy policy published; URL in both stores
-- [ ] `docs/PRIVACY_AND_RETENTION.md` reviewed; in-app privacy sheet updated
-      with the real provider name
-- [ ] Camera purpose string reviewed
-- [ ] `docs/DEVICE_TEST_CHECKLIST.md` completed on real devices
+## 1. Automated Gates
 
-## Known limitations to accept or fix before release
-| Item | Impact | Decision |
-|---|---|---|
-| Local-only data, no backup or sync | Data lost with the phone | Accept for Phase 1 or build sync |
-| Plaintext SQLite | Readable if the device is compromised | Accept or add encryption |
-| Daily cap resets on app data clear | Not abuse protection | Accept; rely on App Check and quotas |
-| Gallery import has manual crop only | Angled photos extract worse | Accept; guidance covers it |
-| No real analytics or crash reporting | Blind to field problems | Choose providers |
-| Fallback model never tested on real invoices | Accuracy and cost unknown | Run the accuracy evaluation |
-| No custom typeface | Platform default look | Add a bundled font if wanted |
-| Saved invoices are read-only | Typos can't be fixed after saving | Accept or add editing |
-| Offline queue runs only while the app is open | No background retry | Accept or add WorkManager / BGTaskScheduler |
+- [ ] `flutter analyze` reports **0 issues**.
+- [ ] Full suite passes:
+  ```bash
+  flutter test test/features/invoice_scanner test/core test/app test/platform test/architecture test/accessibility
+  ```
+- [ ] Skipped tests are understood and listed under *Known Limitations* (currently 9).
+- [ ] Release-safety gate passes once Firebase is configured:
+  ```bash
+  RELEASE_CHECK=true flutter test test/platform
+  ```
+
+## 2. Android
+
+- [ ] `applicationId` is `io.github.abdulgeni.invoicescanner` and will not change.
+- [ ] `minSdk 24`, `targetSdk 36`.
+- [ ] `android/key.properties` and `android/app/upload-keystore.jks` exist locally and are **not** in git.
+- [ ] Keystore and passwords are backed up in a secure place.
+- [ ] Release build succeeds and fails if the signing key is missing (no debug fallback):
+  ```bash
+  flutter build apk --release
+  ```
+- [ ] Signature verifies:
+  ```bash
+  apksigner verify --print-certs build/app/outputs/flutter-apk/app-release.apk
+  ```
+- [ ] Manifest requests only the permissions the app needs.
+- [ ] Version name and code bumped in `pubspec.yaml`.
+- [ ] Installed and exercised on a physical device (see `DEVICE_TEST_CHECKLIST.md`).
+
+## 3. Firebase & Gemini (required for real extraction)
+
+- [ ] Firebase project created.
+- [ ] `flutterfire configure` run; real `firebase_options.dart` committed and placeholders removed.
+- [ ] Firebase AI Logic enabled and the Gemini API provisioned.
+- [ ] **App Check** enforced (Play Integrity for release builds).
+- [ ] Remote Config model-name key created, with a safe default.
+- [ ] Budget alerts and quotas set for the project.
+- [ ] Local daily usage cap value reviewed.
+- [ ] Release build no longer needs `USE_DEMO_EXTRACTOR=true`.
+
+## 4. Legal & Privacy
+
+- [ ] `PRIVACY_AND_RETENTION.md` provider-terms checklist is fully answered.
+- [ ] Privacy policy is hosted at a public URL.
+- [ ] In-app privacy sheet matches the policy.
+- [ ] Google Play **Data safety** form matches what the app really does.
+- [ ] Third-party licenses are displayed or accessible.
+
+## 5. Play Store Submission
+
+- [ ] Developer account and app entry created.
+- [ ] Store listing: title, short and full description, screenshots, feature graphic.
+- [ ] App icon and category set.
+- [ ] Content rating questionnaire completed.
+- [ ] Target audience and ads declarations completed.
+- [ ] Privacy policy URL added.
+- [ ] Release uploaded as an AAB (`flutter build appbundle --release`) to an internal test track first.
+
+## 6. GitHub Release (sideload)
+
+- [ ] Git tag matches the version.
+- [ ] Signed APK attached to the GitHub Release.
+- [ ] Release notes written, including known limitations.
+- [ ] README badges (test count, APK size) match the shipped build.
+
+## 7. iOS (not shipped yet)
+
+Invoice Scanner is Android-first by design. Before an iOS release:
+
+- [ ] iOS platform folder added and builds.
+- [ ] Camera and photo-library usage strings added.
+- [ ] Document scanner plugin verified on iOS.
+- [ ] App Check configured with App Attest or DeviceCheck.
+- [ ] App Store privacy labels completed.
+- [ ] Device checklist re-run on an iPhone.
+
+## 8. Known Limitations (keep honest)
+
+- 9 skipped tests: 3 `RELEASE_CHECK`-gated, 2 screen-matrix overflows at 320 dp × 2× text (`PreviewScreen`, `ReviewScreen`), 4 deferred review/echo edge cases.
+- Firebase AI Logic is not configured in the current released APK; it falls back to the demo or unavailable extractor.
+- No Play Store listing yet.
+- No iOS build.
+
+---
+
+**Final sign-off:** ☐ All gates green ☐ Exceptions documented ☐ Approved by: `__________`  Date: `__________`

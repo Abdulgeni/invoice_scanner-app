@@ -1,82 +1,114 @@
-# Device test checklist
+<div align="center">
 
-Run on at least: one low-end Android phone, one recent Android phone, one
-iPhone (after Module 12b). Use a release or profile build. Record result,
-device and build for every row.
+# 📱 Device Test Checklist
 
-## Capture and extraction
+**Run on a real Android phone before every release.**
 
-| # | Scenario | Steps | Expected |
-|---|---|---|---|
-| C1 | Good invoice | Flat A4 invoice, good light, camera | Edges found, preview sharp, read succeeds, review fields match the paper |
-| C2 | Poor light | Dim room, then glare from a lamp | Either a usable scan or a clear "retake" error; never a crash or silent wrong total |
-| C3 | Skewed page | Photograph at ~30 degrees | Scanner straightens it; extraction still correct |
-| C4 | Multi-page | 2, then 5 pages | Pages in order in preview and review; one invoice |
-| C5 | Too many pages | Try 6 pages (iOS: scan 6) | "Up to 5 pages" message, nothing stored |
-| C6 | Gallery import | Import a photo, including a rotated one (EXIF) | Upright in preview and in the sent image |
-| C7 | Not an invoice | Scan a menu or a landscape photo | "Doesn't look like an invoice", retake offered |
-| C8 | Receipt with tax included | Retail receipt | No false total-mismatch alarm |
-| C9 | Camera permission | Deny, then grant in settings | Clear message when denied; works after granting |
-| C10 | Cancel | Cancel at: scanner, optimizing, reading | Back to a sensible screen; reading can be retried |
+</div>
 
-## Offline and recovery
-
-| # | Scenario | Steps | Expected |
-|---|---|---|---|
-| O1 | Offline at read | Airplane mode, scan, Read | "You're offline" card; scan is kept |
-| O2 | Reconnect | Turn airplane mode off with the app open | Invoice moves to review without tapping |
-| O3 | Airplane mode mid-read | Start a read, then enable airplane mode | Typed failure, record stays retryable |
-| O4 | Kill mid-read | Force-quit while reading, reopen | Record resumes or is retryable; no duplicate; no stuck spinner |
-| O5 | Background during review | Edit fields, background 1 minute, return | Edits intact; kill the app too and reopen: draft restored |
-| O6 | Double tap | Double-tap Read invoice and Save | One read, one saved invoice |
-
-## Failures and limits
-
-| # | Scenario | Expected |
-|---|---|---|
-| F1 | App Check rejected (remove the debug token) | "Update needed"; no raw error text |
-| F2 | Server quota hit (set a tiny quota) | "Scanning limit reached" only; no provider names |
-| F3 | Local daily cap (set `DAILY_EXTRACTION_CAP=2`) | Third read shows the same limit message |
-| F4 | Model name invalid in Remote Config | Falls back automatically; read still works |
-| F5 | Firebase misconfigured (placeholder options) | App starts; capture, history and delete work; reading says something went wrong |
-
-## Data and privacy
-
-| # | Check | How |
-|---|---|---|
-| P1 | Images deleted after save | `adb shell run-as <id> ls files/invoice_images` is empty after saving |
-| P2 | Images deleted on delete | Delete an unfinished scan; folder shrinks |
-| P3 | Scanner temp cleaned | Plugin folder empty after save and after relaunch |
-| P4 | No backups (Android) | `adb shell dumpsys backup` shows nothing for the app; manifest has `allowBackup=false` |
-| P5 | Backup exclusion (iOS) | Debug output has no "Could not exclude"; check the attribute in a device backup |
-| P6 | No content in logs | `adb logcat` during a full flow: no vendor names or amounts |
-| P7 | Release build has network | Release APK reads an invoice (INTERNET declared) |
-
-## Accessibility and layout
-
-| # | Check |
+| Field | Value |
 |---|---|
-| A1 | TalkBack / VoiceOver: complete a scan, fix a warning, save, delete. Every control is announced with a name; notes are read right after their field |
-| A2 | Largest system font: home, review, failure, history. Nothing clipped; everything reachable by scrolling |
-| A3 | Display size at maximum on a small phone |
-| A4 | Dark mode on every screen; text readable |
-| A5 | Rotate on every screen (phones and a tablet or foldable) |
-| A6 | "Remove animations" on: sweep and shimmer stop; nothing waits on animation |
-| A7 | One-handed reach: primary buttons reachable at the bottom |
+| Build | `__________` |
+| Device / Android version | `__________` |
+| Tester / Date | `__________` |
+| Extractor | ☐ Demo (`USE_DEMO_EXTRACTOR=true`) ☐ Real Gemini |
 
-## Performance (profile mode, DevTools)
+Mark each row ✅ pass, ❌ fail, or ➖ not applicable. Note failures at the bottom.
 
-| # | Check | Target |
-|---|---|---|
-| X1 | Scroll the review form with 30 line items | No dropped-frame bursts |
-| X2 | Typing in a field with warnings showing | No visible lag |
-| X3 | Scan sweep while reading | Smooth; CPU not pegged |
-| X4 | 5-page scan, then open the review | No out-of-memory; memory settles afterwards |
+---
 
-## Accuracy evaluation (needed before choosing the model)
+## 1. Install & Launch
 
-Collect 20 real invoices (mixed layouts, currencies, quality). For each field
-record right / wrong / missing. Report per-field accuracy and how often the
-user had to correct a field. Repeat with each candidate model and with image
-size 1600 versus 2000. Decide the fallback model constant from this, not from
-documentation defaults.
+- [ ] Release APK installs with `adb install -r` and launches without a crash.
+- [ ] App name and adaptive launcher icon (including monochrome layer) look correct.
+- [ ] Cold start shows the home screen with no error banner.
+- [ ] Orphaned images from a previous force-quit are cleaned on launch.
+
+## 2. Capture
+
+- [ ] Camera permission prompt appears and is handled when **denied**, then recoverable from settings.
+- [ ] Native document scanner opens and returns a cropped page.
+- [ ] Importing from gallery works.
+- [ ] Stacking up to 5 pages works; adding a 6th is blocked with a clear message.
+- [ ] Cancelling the scanner returns to the start state with nothing saved.
+- [ ] Preview shows the pages; **Retake** and **Discard** both work.
+
+## 3. Extraction
+
+- [ ] Demo extractor returns sample data after about 2 seconds.
+- [ ] Real extraction fills vendor, date, currency, line items, and totals.
+- [ ] Processing screen can be cancelled.
+- [ ] A non-invoice photo produces the "not an invoice" card.
+- [ ] A blank or unreadable page produces the empty or malformed card.
+
+## 4. Review & Save
+
+- [ ] Every field is editable.
+- [ ] Editing a line item recalculates its total; a manually set total is never overwritten.
+- [ ] Changing currency reseeds the amount field correctly.
+- [ ] Warnings are shown but do not block save.
+- [ ] Unparseable text blocks save with a clear notice.
+- [ ] Date picker works and respects the device locale.
+- [ ] Decimal comma and decimal point inputs both parse as expected.
+- [ ] Save succeeds and the invoice appears in History.
+
+## 5. Offline & Failure Behaviour
+
+- [ ] Airplane mode during extraction shows a network failure card.
+- [ ] Retry after reconnecting succeeds.
+- [ ] Failed(network) scans are retried automatically when the app resumes online.
+- [ ] A merely-captured, never-extracted scan is **not** sent after reconnecting.
+- [ ] Force-quit during extraction, then reopen: the invoice is still listed and can be resumed.
+- [ ] Quota, timeout, App Check, and safety failures each show a distinct plain-language card.
+
+## 6. History & Detail
+
+- [ ] "In progress" and "Saved" sections group correctly.
+- [ ] Each status tile shows plain-language text.
+- [ ] Tapping an unfinished invoice resumes it; tapping a saved one opens it read-only.
+- [ ] Delete asks for confirmation and removes the invoice and its images.
+- [ ] Privacy sheet opens and reads correctly.
+
+## 7. Privacy
+
+- [ ] No invoice text appears in `adb logcat` during a full scan, extract, save, and delete cycle.
+- [ ] App makes no network calls before the user taps Extract (check with a proxy or network monitor).
+- [ ] After delete, the image directory has no leftover files for that invoice.
+
+## 8. Accessibility
+
+- [ ] TalkBack announces every button and field with a meaningful label.
+- [ ] All tap targets are at least 48 dp.
+- [ ] Text scale 200%: no clipped text or overflow on every screen. _(Known gap: `PreviewScreen` and `ReviewScreen` at 320 dp × 2× text.)_
+- [ ] Dark theme is readable throughout.
+- [ ] Right-to-left locale (for example Arabic) mirrors the layout correctly.
+- [ ] Display size and font size set to maximum in system settings still work.
+
+## 9. Performance
+
+- [ ] Compression of 5 pages does not freeze the UI.
+- [ ] Scrolling a History list of 100+ invoices stays smooth.
+- [ ] Memory stays stable across 10 consecutive scans.
+- [ ] Battery and heat are reasonable after 10 minutes of use.
+
+## 10. Accuracy Evaluation (real Gemini only)
+
+Test at least 20 real invoices across vendors, languages, and layouts.
+
+| # | Vendor correct | Date correct | Total correct | Line items correct | Notes |
+|---|---|---|---|---|---|
+| 1 | ☐ | ☐ | ☐ | ☐ | |
+| 2 | ☐ | ☐ | ☐ | ☐ | |
+| 3 | ☐ | ☐ | ☐ | ☐ | |
+
+Record the pass rate per field. Decide a minimum acceptable rate before release.
+
+---
+
+## Failures & Notes
+
+```text
+(describe anything that failed, with steps to reproduce)
+```
+
+**Sign-off:** ☐ Ready to ship ☐ Blocked

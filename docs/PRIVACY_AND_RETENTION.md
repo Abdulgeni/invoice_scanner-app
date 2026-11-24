@@ -1,76 +1,74 @@
-# Privacy and retention (engineering draft)
+<div align="center">
 
-Status: describes what the code does today. It is not legal advice and needs
-review by someone qualified before any store submission.
+# 🔐 Privacy & Retention
 
-## What is stored on the device
+**What Invoice Scanner stores, what leaves the device, and how deletion works.**
 
-| Data | Where | Kept until |
+</div>
+
+> **Principle:** invoices are financial documents. The app keeps them on the device, sends a scan off the device only when the user asks for it to be read, and never writes invoice content to logs or crash reports.
+
+---
+
+## 1. Data Stored on the Device
+
+| Data | Location | Retention |
 |---|---|---|
-| Saved invoice (vendor, number, date, line items, amounts, currency) | SQLite database in `<support>/invoice_data/` | The user deletes it |
-| Unfinished scan (page images, status, any extracted data and edits) | Database row plus JPEGs in `<support>/invoice_images/` | The user saves or discards it |
-| Original scanner output (full resolution) | Plugin folder | Deleted right after compression; leftovers cleaned on launch and after each save |
-| Extraction snapshot (what the model returned, to measure corrections) | Database, same row | Erased on save or delete |
-| Deleted invoice | A tombstone: id and timestamps only | Kept for a future sync feature; contains no invoice data |
-| Daily usage counter (date and count) | `<support>/invoice_data/usage_counter.json` | Overwritten daily |
-| Firebase anonymous user id, App Check state, cached Remote Config | Managed by the Firebase SDKs | Until the app is uninstalled or data cleared |
+| Scanned page images (JPEG, long edge ≤ 1600 px, ≤ 5 pages) | Managed app image directory | Removed on save, on discard, and swept on launch for orphans |
+| Invoice records (vendor, dates, line items, totals) | Local Drift SQLite database | Until the user deletes the invoice |
+| Money values | Same database | Stored as integer minor units with an explicit currency |
+| Extraction queue state (status, attempt count) | Same database | Cleared when the extraction succeeds, fails permanently, or the invoice is deleted |
+| Daily usage counter | Local storage | Rolls over daily |
 
-No invoice content is written to logs, analytics or crash reports.
-`NoopScanAnalytics` and `NoopCrashReporter` are the defaults; their
-interfaces carry only counts, durations, error kinds, field names and error
-type names.
+No account profile, contacts, location, or advertising identifiers are collected by the app code.
 
-## What leaves the device
+## 2. Data That Leaves the Device
 
-When the user taps "Read invoice":
-- the compressed page images (JPEG, long edge at most 1600 px, no EXIF) and a
-  fixed instruction prompt go to Firebase AI Logic (Agent Platform Gemini API
-  by default) over TLS;
-- a Firebase anonymous-auth token and an App Check token accompany the request;
-- the app fetches Remote Config (the model name) on start and about hourly.
+| When | What is sent | To whom | Why |
+|---|---|---|---|
+| The user taps **Extract** (or a queued retry the user previously requested) | The compressed invoice page images | Gemini via Firebase AI Logic | Read the invoice into structured fields |
+| Each extraction request | An App Check token | Firebase | Reject requests from tampered or unofficial clients |
+| App start (if configured) | Remote Config fetch | Firebase | Optional model-name override |
+| Uncaught error (if a reporter is installed) | Error `runtimeType` and stack trace only | Crash reporting backend | Diagnose crashes |
 
-Nothing else leaves the device. Saved invoices are not synced.
+**A scan that is merely captured never leaves the device.** The offline queue only retries scans the user explicitly asked to read: `failed(network)` or an interrupted `pendingExtraction` with `attemptCount > 0`.
 
-## Retention and deletion rules (and the code that enforces them)
+## 3. What Is Never Collected or Logged
 
-- Page images are deleted after a successful save and on delete
-  (`SaveInvoice`, `DeleteInvoice`).
-- Scanner temp files: deleted after compression, after each save, and on
-  launch (`CaptureInvoice`, `SaveInvoice`, `RecoverInterruptedWork`).
-- Orphaned images (crash leftovers) are swept on launch
-  (`RecoverInterruptedWork`).
-- Deleting an invoice erases its data and images immediately (`DeleteInvoice`
-  and the tombstone rules in `InvoiceRecord.markDeleted`).
-- A scan that is never read or discarded stays on the device until the user
-  acts. There is no automatic expiry.
-- At most 5 pages per invoice are accepted.
+- Invoice content (vendor names, amounts, line items) in logs, errors, or crash reports.
+- `print` and `developer.log` calls outside a guarded `debugPrint` allowlist, enforced by `architecture_test.dart`.
+- `InvoiceFailure.debugCode` and the crash reporter carry only type names and short codes.
 
-## Backups
+## 4. Deletion
 
-- Android: `allowBackup="false"`; nothing is backed up.
-- iOS: the two data folders are marked "excluded from backup" at every launch.
-  Consequence: invoices do not survive a lost or replaced phone.
+1. The user opens a saved invoice and chooses **Delete**, then confirms.
+2. The record is removed through a tombstone delete so an in-flight queue run cannot resurrect it or lose it silently.
+3. Associated page images are removed from the managed directory.
+4. Uninstalling the app removes all local data.
 
-## Provider terms (verify before release)
+> Data already sent to the AI provider is governed by the provider's terms, not by the app. See section 5.
 
-- Agent Platform: prompts and responses are not used to improve Google
-  products; enterprise data terms apply. Confirm the data-processing terms and
-  the data location with your Google Cloud contact.
-- Gemini Developer API free tier: may use content to improve products and may
-  involve human review. Never use it with real invoices.
-- Abuse-monitoring logs may be retained by the provider for a limited period.
+## 5. Provider Terms to Verify Before Release
 
-## Controls and limits
+Fill these in against the current provider documents; do not ship with them blank.
 
-- The user can delete any invoice from the history list or the detail screen.
-- A local daily cap (default 60 reads) and server-side per-user quotas limit
-  usage. Neither is abuse protection on its own; App Check enforcement is.
+- [ ] Whether Gemini API inputs sent through Firebase AI Logic are used for model training, and under which plan or setting.
+- [ ] Provider retention period for request content (including abuse-monitoring logs).
+- [ ] Data-processing region and any data-residency commitments.
+- [ ] Whether a data processing agreement is required for your users.
+- [ ] Firebase and Google Play data-safety declarations match this document.
 
-## Open items for review
+## 6. User-Facing Privacy Sheet
 
-- Privacy policy text and URL; Play Data safety and App Store privacy answers
-  (images are sent to an AI service; no data is sold; data is not linked to an
-  account other than an anonymous id).
-- Whether saved data should be encrypted at rest.
-- Whether unfinished scans should expire automatically.
-- Name the actual provider and region in the in-app privacy sheet.
+The in-app privacy sheet should state, in plain language:
+
+1. Invoices are stored on this device.
+2. A scan is sent for reading only when you tap Extract.
+3. You can delete any invoice at any time.
+4. The app does not log what is on your invoices.
+
+## 7. Policy URL
+
+Google Play requires a hosted privacy policy URL. Publish this document (or a user-friendly derivative) and link it from the store listing and the app.
+
+_Last reviewed: update this date at every release._
