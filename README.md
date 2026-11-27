@@ -6,7 +6,7 @@
 
 # 📄 INVOICE SCANNER
 ### Production-Grade Invoice Capture, Gemini Extraction & On-Device Review
-**Built with Flutter 3.38 · Dart 3 · BLoC · Drift SQLite · Firebase AI Logic · Clean Architecture**
+**Built with Flutter 3.38 ·Dart 3 · BLoC · Drift SQLite · Firebase AI Logic · Clean Architecture**
 
 <br />
 
